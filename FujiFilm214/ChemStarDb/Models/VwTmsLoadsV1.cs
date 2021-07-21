@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 #nullable disable
 
@@ -40,7 +41,7 @@ namespace FujiFilm214.ChemStarDb.Models
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
-        public VwTmsShipmentLegsV1 ShipmentLegs { get; set; }
-        public VwTmsLoadStopsV1 ShipmentLoadStops { get; set; }
+        public ICollection<VwTmsShipmentLegsV1> ShipmentLegs { get; set; }
+        public ICollection<VwTmsLoadStopsV1> ShipmentLoadStops { get; set; }
     }
 }

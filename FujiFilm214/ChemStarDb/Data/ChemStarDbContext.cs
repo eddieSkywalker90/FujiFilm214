@@ -32,9 +32,16 @@ namespace FujiFilm214.ChemStarDb.Models
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
+            modelBuilder.Entity<VwTmsLoadStopsV1>()
+                .HasOne(loadstop => loadstop.Load)
+                .WithMany(load => load.ShipmentLoadStops)
+                .HasForeignKey(loadstop => loadstop.Id);
+
             modelBuilder.Entity<VwTmsLoadStopsV1>(entity =>
             {
-                entity.HasNoKey();
+                // entity.HasNoKey();
+
+                entity.HasKey(e => e.Id);
 
                 entity.ToView("vw_TmsLoadStops_V1");
 
@@ -87,12 +94,97 @@ namespace FujiFilm214.ChemStarDb.Models
                 entity.Property(e => e.StopType).HasMaxLength(25);
             });
 
-            // modelBuilder.Entity<VwTmsLoadsV1s>()
-            //     .HasOne(v =)
+            modelBuilder.Entity<VwTmsShipmentLegStatusesV1>()
+                .HasOne(legstatus => legstatus.ShipmentLeg)
+                .WithMany(leg => leg.ShipmentLegStatus)
+                .HasForeignKey(status => status.Id);
+
+            modelBuilder.Entity<VwTmsShipmentLegStatusesV1>(entity =>
+            {
+                // entity.HasNoKey();
+
+                entity.HasKey(e => e.Id);
+
+                entity.ToView("vw_TmsShipmentLegStatuses_V1");
+
+                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+
+                entity.Property(e => e.DataSource).HasMaxLength(50);
+
+                entity.Property(e => e.DataSourceType).HasMaxLength(40);
+
+                entity.Property(e => e.Id)
+                    .IsRequired()
+                    .HasMaxLength(15);
+
+                entity.Property(e => e.ReasonCode).HasMaxLength(100);
+
+                entity.Property(e => e.ReasonCodeId).HasMaxLength(5);
+
+                entity.Property(e => e.ShipmentId)
+                    .IsRequired()
+                    .HasMaxLength(55);
+
+                entity.Property(e => e.StatusAction).HasMaxLength(50);
+
+                entity.Property(e => e.StatusCode).HasMaxLength(100);
+
+                entity.Property(e => e.StatusCodeId).HasMaxLength(5);
+
+                entity.Property(e => e.StatusDate).HasColumnType("datetime");
+
+                entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<VwTmsShipmentLegsV1>(entity =>
+            {
+                // entity.HasNoKey();
+
+                entity.HasKey(e => e.Id);
+
+                entity.ToView("vw_TmsShipmentLegs_V1");
+
+                entity.Property(e => e.BillableAllocation).HasColumnType("decimal(16, 4)");
+
+                entity.Property(e => e.BillableAllocationCurrencyCode).HasMaxLength(5);
+
+                entity.Property(e => e.DistanceUnit).HasMaxLength(5);
+
+                entity.Property(e => e.Id)
+                    .IsRequired()
+                    .HasMaxLength(15);
+
+                entity.Property(e => e.PayableAllocation).HasColumnType("decimal(16, 4)");
+
+                entity.Property(e => e.PayableAllocationCurrencyCode).HasMaxLength(5);
+
+                entity.Property(e => e.PickUpStopId).HasMaxLength(50);
+
+                entity.Property(e => e.ScheduleIntegrationKey).HasMaxLength(50);
+
+                entity.Property(e => e.ShipmentId)
+                    .IsRequired()
+                    .HasMaxLength(55);
+
+                entity.Property(e => e.ShipperReference).HasMaxLength(50);
+
+                entity.Property(e => e.StatusDescription).HasMaxLength(50);
+
+                entity.Property(e => e.TmsPlanningAbility).HasMaxLength(50);
+
+                entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<VwTmsShipmentLegsV1>()
+                .HasOne(leg => leg.Load)
+                .WithMany(load => load.ShipmentLegs)
+                .HasForeignKey(leg => leg.Id);
 
             modelBuilder.Entity<VwTmsLoadsV1>(entity =>
             {
-                entity.HasNoKey();
+                // entity.HasNoKey();
+
+                entity.HasKey(e => e.Id);
 
                 entity.ToView("vw_TmsLoads_V1");
 
@@ -167,81 +259,11 @@ namespace FujiFilm214.ChemStarDb.Models
                 entity.Property(e => e.WeightUom).HasMaxLength(5);
             });
 
-            modelBuilder.Entity<VwTmsShipmentLegStatusesV1>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("vw_TmsShipmentLegStatuses_V1");
-
-                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
-
-                entity.Property(e => e.DataSource).HasMaxLength(50);
-
-                entity.Property(e => e.DataSourceType).HasMaxLength(40);
-
-                entity.Property(e => e.Id)
-                    .IsRequired()
-                    .HasMaxLength(15);
-
-                entity.Property(e => e.ReasonCode).HasMaxLength(100);
-
-                entity.Property(e => e.ReasonCodeId).HasMaxLength(5);
-
-                entity.Property(e => e.ShipmentId)
-                    .IsRequired()
-                    .HasMaxLength(55);
-
-                entity.Property(e => e.StatusAction).HasMaxLength(50);
-
-                entity.Property(e => e.StatusCode).HasMaxLength(100);
-
-                entity.Property(e => e.StatusCodeId).HasMaxLength(5);
-
-                entity.Property(e => e.StatusDate).HasColumnType("datetime");
-
-                entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
-            });
-
-            modelBuilder.Entity<VwTmsShipmentLegsV1>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToView("vw_TmsShipmentLegs_V1");
-
-                entity.Property(e => e.BillableAllocation).HasColumnType("decimal(16, 4)");
-
-                entity.Property(e => e.BillableAllocationCurrencyCode).HasMaxLength(5);
-
-                entity.Property(e => e.DistanceUnit).HasMaxLength(5);
-
-                entity.Property(e => e.Id)
-                    .IsRequired()
-                    .HasMaxLength(15);
-
-                entity.Property(e => e.PayableAllocation).HasColumnType("decimal(16, 4)");
-
-                entity.Property(e => e.PayableAllocationCurrencyCode).HasMaxLength(5);
-
-                entity.Property(e => e.PickUpStopId).HasMaxLength(50);
-
-                entity.Property(e => e.ScheduleIntegrationKey).HasMaxLength(50);
-
-                entity.Property(e => e.ShipmentId)
-                    .IsRequired()
-                    .HasMaxLength(55);
-
-                entity.Property(e => e.ShipperReference).HasMaxLength(50);
-
-                entity.Property(e => e.StatusDescription).HasMaxLength(50);
-
-                entity.Property(e => e.TmsPlanningAbility).HasMaxLength(50);
-
-                entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
-            });
-
             modelBuilder.Entity<VwWmsTmsOrder>(entity =>
             {
-                entity.HasNoKey();
+                // entity.HasNoKey();
+
+                entity.HasKey(e => e.Id);
 
                 entity.ToView("vw_WmsTmsOrders");
 

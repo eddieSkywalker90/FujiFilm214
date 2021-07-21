@@ -7,7 +7,7 @@ namespace FujiFilm214
         private static void Main(string[] args)
         {
             FujiFilmController fuji = new();
-            fuji.InitializeTriggers(Configuration.ChemStarDbConnection);
+            fuji.InitializeTriggers(Configuration.ProgramStatusDbConnection);
         }
     }
 }

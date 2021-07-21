@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 
 #nullable disable
 
 namespace FujiFilm214.ChemStarDb.Models
 {
-    public partial class VwTmsLoadStopsV1
+    public class VwTmsLoadStopsV1
     {
         public string Id { get; set; }
         public string LoadId { get; set; }
@@ -33,5 +32,7 @@ namespace FujiFilm214.ChemStarDb.Models
         public string IsPoolPoint { get; set; }
         public DateTime? FileDate { get; set; }
         public int? FileId { get; set; }
+
+        public VwTmsLoadsV1 Load { get; set; }
     }
 }

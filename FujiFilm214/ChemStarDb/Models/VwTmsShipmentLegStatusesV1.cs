@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 
 #nullable disable
 
 namespace FujiFilm214.ChemStarDb.Models
 {
-    public partial class VwTmsShipmentLegStatusesV1
+    public class VwTmsShipmentLegStatusesV1
     {
         public string Id { get; set; }
         public int? LoadId { get; set; }
@@ -24,5 +23,7 @@ namespace FujiFilm214.ChemStarDb.Models
         public DateTime? StatusDate { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+
+        public VwTmsShipmentLegsV1 ShipmentLeg { get; set; }
     }
 }

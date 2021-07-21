@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 #nullable disable
 
@@ -27,6 +28,7 @@ namespace FujiFilm214.ChemStarDb.Models
         public string PayableAllocationCurrencyCode { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
-        public VwTmsShipmentLegStatusesV1 ShipmentLegStatuses { get; set; }
+        public VwTmsLoadsV1 Load { get; set; }
+        public ICollection<VwTmsShipmentLegStatusesV1> ShipmentLegStatus { get; set; }
     }
 }

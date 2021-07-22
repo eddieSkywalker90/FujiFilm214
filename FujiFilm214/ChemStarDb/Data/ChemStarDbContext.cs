@@ -1,9 +1,10 @@
 ﻿using System;
+using FujiFilm214.ChemStarDb.Models;
 using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 
-namespace FujiFilm214.ChemStarDb.Models
+namespace FujiFilm214.ChemStarDb.Data
 {
     public class ChemStarDbContext : DbContext
     {
@@ -32,10 +33,10 @@ namespace FujiFilm214.ChemStarDb.Models
         {
             modelBuilder.HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS");
 
-            modelBuilder.Entity<VwTmsLoadStopsV1>()
-                .HasOne(loadstop => loadstop.Load)
-                .WithMany(load => load.ShipmentLoadStops)
-                .HasForeignKey(loadstop => loadstop.Id);
+            // modelBuilder.Entity<VwTmsLoadStopsV1>()
+            //     .HasOne(loadstop => loadstop.Load)
+            //     .WithMany(load => load.ShipmentLoadStops)
+            //     .HasForeignKey(loadstop => loadstop.Id);
 
             modelBuilder.Entity<VwTmsLoadStopsV1>(entity =>
             {
@@ -96,8 +97,8 @@ namespace FujiFilm214.ChemStarDb.Models
 
             modelBuilder.Entity<VwTmsShipmentLegStatusesV1>()
                 .HasOne(legstatus => legstatus.ShipmentLeg)
-                .WithMany(leg => leg.ShipmentLegStatus)
-                .HasForeignKey(status => status.Id);
+                .WithMany(leg => leg.ShipmentLegStatuses)
+                .HasForeignKey(status => status.ShipmentLegId);
 
             modelBuilder.Entity<VwTmsShipmentLegStatusesV1>(entity =>
             {
@@ -175,10 +176,10 @@ namespace FujiFilm214.ChemStarDb.Models
                 entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
             });
 
-            modelBuilder.Entity<VwTmsShipmentLegsV1>()
-                .HasOne(leg => leg.Load)
-                .WithMany(load => load.ShipmentLegs)
-                .HasForeignKey(leg => leg.Id);
+            // modelBuilder.Entity<VwTmsShipmentLegsV1>()
+            //     .HasOne(leg => leg.Load)
+            //     .WithMany(load => load.ShipmentLegs)
+            //     .HasForeignKey(leg => leg.Id);
 
             modelBuilder.Entity<VwTmsLoadsV1>(entity =>
             {

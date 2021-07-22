@@ -11,8 +11,13 @@ namespace FujiFilm214
         public static IConfigurationRoot Root = Initialize();
         
         public static readonly string Environment = System.Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+
+        // Database.
         public static readonly string ProgramStatusDbConnection = Root["ConnectionStrings:SqlLiteDb"];
         public static readonly string ChemStarDbConnection = Root["ConnectionStrings:ChemStarDb"];
+        // Logging.
+        public static readonly string LogsFilePath = Root["Configuration:LogsFilePath"];
+        public static readonly string DebugLogsFilePath = Root["Configuration:DebugLogsFilePath"];
 
         private static IConfigurationRoot Initialize()
         {

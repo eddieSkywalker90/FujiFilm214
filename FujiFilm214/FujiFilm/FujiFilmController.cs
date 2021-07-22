@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using FujiFilm214.ChemStarDb.Models;
+using FujiFilm214.ChemStarDb.Data;
 using JankyIntegrationManager;
 
 namespace FujiFilm214.FujiFilm
@@ -21,16 +21,16 @@ namespace FujiFilm214.FujiFilm
 
             // Access ChemStar DB to pull data
             using ChemStarDbContext dbContext = new();
-            var wmsTmsOrders = dbContext.VwTmsShipmentLegStatusesV1s.Take(10).ToList();
+            var wmsTmsOrders = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
 
             // Grab each entries ID as the RecordId.
             List<string> newOrUpdatedRecords = new();
             foreach (var recordEntry in wmsTmsOrders)
             {
                 newOrUpdatedRecords.Add(recordEntry.Id);
-                Console.WriteLine("New/Updated RecordIDs: " + recordEntry.Id);
+                Console.WriteLine($"New/Updated RecordIDs: {recordEntry.Id}");
             }
-            Console.WriteLine("\nWmsTmsOrders Count: " + wmsTmsOrders.Count);
+            Console.WriteLine($"WmsTmsOrders Count: {wmsTmsOrders.Count} \n");
 
             return newOrUpdatedRecords;
         }
@@ -44,11 +44,11 @@ namespace FujiFilm214.FujiFilm
         /// <returns></returns>
         protected override MemoryStream GetRecordPayload(string recordId)
         {
+            Console.WriteLine($"GetRecordPayload() - Building XML for record #: {recordId}..");
             MemoryStream xmlDataStream = new();
             FujiFilmXml xml = new();
-            xml.Build(xmlDataStream);
-
-            Console.WriteLine("\n" + Encoding.UTF8.GetString(xmlDataStream.ToArray()));
+            xml.Build(xmlDataStream, recordId);
+            Console.WriteLine(Encoding.UTF8.GetString(xmlDataStream.ToArray()) + "\n");
 
             #region Old Soon To Be Deleted..
 

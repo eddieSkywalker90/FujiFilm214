@@ -1,16 +1,19 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
+using FujiFilm214.ChemStarDb.Data;
 
 namespace FujiFilm214.FujiFilm
 {
     public class FujiFilmXml
     {
-        public void Build(MemoryStream memoryStream)
+        public void Build(MemoryStream memoryStream, string recordId)
         {
-            Console.WriteLine("Building XML.. \n");
             using var writer = SetupXmlWriter(memoryStream);
+            Console.WriteLine("Date: " + DateTime.Now.ToString("yyyyMMdd"));
+            Console.WriteLine("Time: " + DateTime.Now.ToString("hhmm"));
 
             writer.WriteStartElement("IX");
             writer.WriteAttributeString("tag", "ISA");
@@ -36,8 +39,8 @@ namespace FujiFilm214.FujiFilm
             writer.WriteAttributeString("GS01", "QM");
             writer.WriteAttributeString("GS02", "RCHM");
             writer.WriteAttributeString("GS03", "CFEM");
-            writer.WriteAttributeString("GS04", "20210512"); //TODO: Calc date.
-            writer.WriteAttributeString("GS05", "1613"); //TODO: Calc time.
+            writer.WriteAttributeString("GS04", DateTime.Now.ToString("yyyyMMdd"));
+            writer.WriteAttributeString("GS05", DateTime.Now.ToString("hhmm"));  
             writer.WriteAttributeString("GS06", "id");
             writer.WriteAttributeString("GS07", "X");
             writer.WriteAttributeString("GS08", "004010");
@@ -50,7 +53,39 @@ namespace FujiFilm214.FujiFilm
             writer.WriteStartElement("B10");
             writer.WriteAttributeString("tag", "B10");
             writer.WriteAttributeString("B1001", "0073969");
-            writer.WriteAttributeString("B1002", "Fuji NK to OR_5/6");  // TmsShipmentLegStatus.TmsShipmentLeg.ScheduleIntegrationKey.
+
+
+            // var legList = dbContext.VwTmsLoadsV1s
+            //     .Take(10)
+            //     .Include(load => load.ShipmentLegs).ToList();
+            using ChemStarDbContext dbContext = new();
+            // var scheduleKey = dbContext.VwTmsLoadsV1s
+            //     .Include(load => load.ShipmentLegs)
+            //
+            //
+            //
+            // var key = dbContext.VwTmsShipmentLegStatusesV1s
+            //     .Where(status => status.Id.Equals(recordId))
+                // .Include(l => l.ShipmentLegId.Equals(dbContext.VwTmsShipmentLegStatusesV1s.Include(l => l));
+            
+            // var ScheduleIntegrationKey = dbContext.VwTmsShipmentLegsV1s
+            //     .Where(leg => leg.Id.Equals(dbContext.VwTmsShipmentLegStatusesV1s.First(status => status.Id.Equals(617383252)).Id)).ToList();
+
+            var scheduleIntegrationKey = dbContext.VwTmsShipmentLegStatusesV1s.ToList();
+                // .Where(status => status.Id.Equals("617383252"));
+                // .Include(status => status.ShipmentLeg);
+
+            // var legRecordEntry = scheduleIntegrationKey.Where(status => status.ShipmentLeg.LoadId.ToString().Equals("104423440"));
+            // Console.WriteLine(legRecordEntry.Count());
+            //
+            // Console.WriteLine("ShipLegID: " + ScheduleIntegrationKey.Where(status => status.ShipmentLeg.LoadId.Equals(125146648)));
+            // Console.WriteLine("ShipLegID: " + ScheduleIntegrationKey.First(status => status.ShipmentLeg.LoadId));
+            // Console.WriteLine(scheduleIntegrationKey.First().ShipmentLegId);
+
+            // Console.WriteLine("Returning key: Count: " + ScheduleIntegrationKey.Count() + " " + ScheduleIntegrationKey.First().);
+
+
+                writer.WriteAttributeString("B1002", "Fuji NK to OR_5/6");  // TmsShipmentLegStatus.TmsShipmentLeg.ScheduleIntegrationKey.
             writer.WriteAttributeString("B1003", "RCHM");               // TmsShipmentLegStatus.TmsLoad.CarrierScac.
             writer.WriteEndElement();
 
@@ -116,6 +151,18 @@ namespace FujiFilm214.FujiFilm
             writer.WriteEndElement(); 
             writer.Flush();
             writer.Close();
+        }
+
+        /// <summary>
+        ///     The format of time is HHMM (i.e. 12:56pm would be 1256).
+        ///     This did not appear under the format options for C#,
+        ///     this method is to remove the semicolon.
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        private string? CalculateTime(string time)
+        {
+            return time;
         }
 
         /// <summary>

@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
+using System.Xml.Linq;
 using FujiFilm214.ChemStarDb.Data;
 using JankyIntegrationManager;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace FujiFilm214.FujiFilm
 {
-    public class FujiFilmController : DeltaCheckIntegrationManager<MemoryStream>
+    public class FujiFilmController : DeltaCheckIntegrationManager<XDocument>
     {
         /// <summary>
         ///     Call associated SQL View to return list of potentially new/updated records.
@@ -21,95 +22,54 @@ namespace FujiFilm214.FujiFilm
 
             // Access ChemStar DB to pull data
             using ChemStarDbContext dbContext = new();
-            var wmsTmsOrders = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
+            var changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
 
             // Grab each entries ID as the RecordId.
-            List<string> newOrUpdatedRecords = new();
-            foreach (var recordEntry in wmsTmsOrders)
-            {
-                newOrUpdatedRecords.Add(recordEntry.Id);
-                Console.WriteLine($"New/Updated RecordIDs: {recordEntry.Id}");
-            }
-            Console.WriteLine($"WmsTmsOrders Count: {wmsTmsOrders.Count} \n");
+            List<string> changedStatusIds = new();
+            foreach (var status in changedStatuses) changedStatusIds.Add(status.Id);
+            Console.WriteLine($"Updated Statuses Count: {changedStatusIds.Count}");
+            Console.WriteLine($"Updated Statuses: {string.Join(',', changedStatusIds)}");
 
-            return newOrUpdatedRecords;
+            return changedStatusIds;
         }
 
         /// <summary>
         ///     Using the collection of returned record id's generated from IdentifyPotentiallyChangedRecordIds(),
         ///     query the SQLDW database to create a payload from joining matching recordID's in associated tables.
         /// </summary>
-        /// <param name="recordId"></param>
+        /// <param name="statusId"></param>
         /// <param name="writer"></param>
         /// <returns></returns>
-        protected override MemoryStream GetRecordPayload(string recordId)
+        protected override XDocument GetRecordPayload(string statusId)
         {
-            Console.WriteLine($"GetRecordPayload() - Building XML for record #: {recordId}..");
-            MemoryStream xmlDataStream = new();
-            FujiFilmXml xml = new();
-            xml.Build(xmlDataStream, recordId);
-            Console.WriteLine(Encoding.UTF8.GetString(xmlDataStream.ToArray()) + "\n");
+            Log.Information("---------------------------------------");
+            Log.Information($"GetRecordPayload - {statusId}");
 
-            #region Old Soon To Be Deleted..
+            using ChemStarDbContext dbContext = new();
+            var tmsStatuses = dbContext.VwTmsShipmentLegStatusesV1s
+                .Include(status => status.ShipmentLeg)
+                .ThenInclude(shipmentLeg => shipmentLeg.Load)
+                .Include(status => status.ShipmentLeg.PickUpStop)
+                .Include(status => status.ShipmentLeg.DropOffStop)
+                .Where(status => status.Id == statusId)
+                .OrderByDescending(status => status.UpdatedAt)
+                .Take(1)
+                .ToList();
 
-            // var shipmentLegStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Select(order => order.Id.Equals("617383252"));
-            // var shipmentLegs = dbContext.VwTmsShipmentLegsV1s.Select(order => order.Id.Equals("279165848"));
-            // var pickUpStops = dbContext.VwTmsLoadStopsV1s.Select(order => order.Id.Equals("274489973"));
-            // var dropOffStops = dbContext.VwTmsLoadStopsV1s.Select(order => order.Id.Equals("274489974"));
-            // var loadIds = dbContext.VwTmsLoadsV1s.Select(order => order.Id.Equals("125146648"));
-
-
-            // var legList = dbContext.VwTmsLoadsV1s
-            //     .Take(10)
-            //     .Include(load => load.ShipmentLegs).ToList();
-            //
-            // foreach (var leg in legList)
-            // {
-            //     Console.WriteLine("LegID: " + leg.Id);
-            // }
-
-
-            // ID: 617383252
-            // var legStatus = dbContext.VwTmsLoadsV1s
-            //     .Where(load => load.Id.Equals(617383252))
-            //     .Where()
+            var xDocument = new XDocument();
+            var tmsStatus = tmsStatuses.FirstOrDefault();
+            var fujiXmlBuilder = new FujiFilmXml(tmsStatus);
+            xDocument = fujiXmlBuilder.Build();
+            if (tmsStatus != null)
+            {
+                Log.Information(
+                    $"{tmsStatus.Id} - {tmsStatus.ShipmentLeg?.ShipperReference} - {tmsStatus.ShipmentLeg?.Load?.LoadGroup} - {tmsStatus.ShipmentLeg?.PickUpStop?.LocationCity} - {tmsStatus.ShipmentLeg?.DropOffStop?.LocationCity}");
+                Log.Information(
+                    $"\n{xDocument}");
+            }
 
 
-            // // Returns list containing all items matching recordId. Typically 1 response, but could be multiple.
-            // var orderLines = dbContext.VwWmsTmsOrderLines.Where(order => order.Id.ToString().Equals(recordId)).ToList();
-            //
-            // if (orderLines.Count == 1)
-            // {
-            //     // Combine tables and build into payload.
-            //     payload.Id = orderLines.First().Id;
-            //     payload.Sku = orderLines.First().Sku;
-            //     payload.EstimatedShipDate = orderLines.First().ModStamp;
-            //
-            //     return payload;
-            // }
-            //
-            // // Grab most recent entry [by date] as the payload.
-            // var firstPass = true;
-            // var mostRecentDate = DateTime.UnixEpoch;
-            // foreach (var order in orderLines)
-            //     if (firstPass)
-            //     {
-            //         mostRecentDate = order.CreateStamp;
-            //         firstPass = false;
-            //     }
-            //     else
-            //     {
-            //         if (order.CreateStamp > mostRecentDate) mostRecentDate = order.CreateStamp;
-            //     }
-            //
-            // var latestOrderLine = orderLines.Find(order => order.ModStamp.Equals(mostRecentDate));
-            // payload.Id = latestOrderLine.Id;
-            // payload.Sku = latestOrderLine.Sku;
-            // payload.EstimatedShipDate = latestOrderLine.ModStamp;
-
-            #endregion
-
-            return xmlDataStream;
+            return xDocument;
         }
     }
 }

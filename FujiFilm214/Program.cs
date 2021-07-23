@@ -13,18 +13,20 @@ namespace FujiFilm214
             {
                 Log.Logger = new LoggerConfiguration()
                     .MinimumLevel.Debug()
-                    .WriteTo.File(Configuration.DebugLogsFilePath, retainedFileCountLimit: 5, rollingInterval: RollingInterval.Day)
-                    .WriteTo.File(Configuration.LogsFilePath, LogEventLevel.Information, retainedFileCountLimit: 5, rollingInterval: RollingInterval.Day)
+                    .WriteTo.File(Configuration.DebugLogsFilePath, retainedFileCountLimit: 5,
+                        rollingInterval: RollingInterval.Day)
+                    .WriteTo.File(Configuration.LogsFilePath, LogEventLevel.Information, retainedFileCountLimit: 5,
+                        rollingInterval: RollingInterval.Day)
                     .WriteTo.Console(LogEventLevel.Debug)
                     .CreateLogger();
 
                 FujiFilmController fujiFilm214 = new();
-                fujiFilm214.InitializeTriggers(Configuration.ProgramStatusDbConnection, Log.Logger);
+                fujiFilm214.InitializeTriggers(Configuration.ProgramStatusDbConnection);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw;
+                //throw;
             }
         }
     }

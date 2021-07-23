@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using FujiFilm214.ChemStarDb.Data;
 using JankyIntegrationManager;
+using Serilog;
 
 namespace FujiFilm214.FujiFilm
 {
@@ -17,8 +18,6 @@ namespace FujiFilm214.FujiFilm
         /// <returns>A List of record id's.</returns>
         protected override List<string> IdentifyPotentiallyChangedRecordIds(DateTime startTime)
         {
-            Console.WriteLine("IdentifyPotentiallyChangedRecordIds() - Returning list of record entries..\n");
-
             // Access ChemStar DB to pull data
             using ChemStarDbContext dbContext = new();
             var wmsTmsOrders = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
@@ -28,9 +27,11 @@ namespace FujiFilm214.FujiFilm
             foreach (var recordEntry in wmsTmsOrders)
             {
                 newOrUpdatedRecords.Add(recordEntry.Id);
-                Console.WriteLine($"New/Updated RecordIDs: {recordEntry.Id}");
+
+                // Dev-only environment.
+                if (Configuration.Environment.Equals("Development")) Log.Debug($"New/Updated RecordIDs: {recordEntry.Id}");
             }
-            Console.WriteLine($"WmsTmsOrders Count: {wmsTmsOrders.Count} \n");
+            Log.Debug($"IdentifyPotentiallyChangedRecordIds() - Returning list of { wmsTmsOrders.Count} record entries..");
 
             return newOrUpdatedRecords;
         }
@@ -44,11 +45,11 @@ namespace FujiFilm214.FujiFilm
         /// <returns></returns>
         protected override MemoryStream GetRecordPayload(string recordId)
         {
-            Console.WriteLine($"GetRecordPayload() - Building XML for record #: {recordId}..");
+            Log.Debug($"GetRecordPayload() - Building XML for record #: {recordId}..");
             MemoryStream xmlDataStream = new();
             FujiFilmXml xml = new();
             xml.Build(xmlDataStream, recordId);
-            Console.WriteLine(Encoding.UTF8.GetString(xmlDataStream.ToArray()) + "\n");
+            Log.Debug(Encoding.UTF8.GetString(xmlDataStream.ToArray()) + "\n");
 
             #region Old Soon To Be Deleted..
 

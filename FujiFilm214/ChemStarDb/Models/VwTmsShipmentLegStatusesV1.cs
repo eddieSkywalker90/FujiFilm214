@@ -9,7 +9,7 @@ namespace FujiFilm214.ChemStarDb.Models
         public string Id { get; set; }
         public int? LoadId { get; set; }
         public string ShipmentId { get; set; }
-        public int? ShipmentLegId { get; set; }
+        public string ShipmentLegId { get; set; }
         public string StatusAction { get; set; }
         public int? StatusActionId { get; set; }
         public string StatusCode { get; set; }

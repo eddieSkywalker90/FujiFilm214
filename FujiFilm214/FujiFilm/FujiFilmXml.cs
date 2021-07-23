@@ -1,19 +1,18 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Xml;
-using FujiFilm214.ChemStarDb.Data;
 
 namespace FujiFilm214.FujiFilm
 {
+    /// <summary>
+    ///     Class used to aid in the creation of the Payload object to be sent to the JankyIntegrationManager.
+    /// </summary>
     public class FujiFilmXml
     {
         public void Build(MemoryStream memoryStream, string recordId)
         {
             using var writer = SetupXmlWriter(memoryStream);
-            Console.WriteLine("Date: " + DateTime.Now.ToString("yyyyMMdd"));
-            Console.WriteLine("Time: " + DateTime.Now.ToString("hhmm"));
 
             writer.WriteStartElement("IX");
             writer.WriteAttributeString("tag", "ISA");
@@ -58,7 +57,7 @@ namespace FujiFilm214.FujiFilm
             // var legList = dbContext.VwTmsLoadsV1s
             //     .Take(10)
             //     .Include(load => load.ShipmentLegs).ToList();
-            using ChemStarDbContext dbContext = new();
+            // using ChemStarDbContext dbContext = new();
             // var scheduleKey = dbContext.VwTmsLoadsV1s
             //     .Include(load => load.ShipmentLegs)
             //
@@ -71,7 +70,7 @@ namespace FujiFilm214.FujiFilm
             // var ScheduleIntegrationKey = dbContext.VwTmsShipmentLegsV1s
             //     .Where(leg => leg.Id.Equals(dbContext.VwTmsShipmentLegStatusesV1s.First(status => status.Id.Equals(617383252)).Id)).ToList();
 
-            var scheduleIntegrationKey = dbContext.VwTmsShipmentLegStatusesV1s.ToList();
+            // var scheduleIntegrationKey = dbContext.VwTmsShipmentLegStatusesV1s.ToList();
                 // .Where(status => status.Id.Equals("617383252"));
                 // .Include(status => status.ShipmentLeg);
 
@@ -85,7 +84,7 @@ namespace FujiFilm214.FujiFilm
             // Console.WriteLine("Returning key: Count: " + ScheduleIntegrationKey.Count() + " " + ScheduleIntegrationKey.First().);
 
 
-                writer.WriteAttributeString("B1002", "Fuji NK to OR_5/6");  // TmsShipmentLegStatus.TmsShipmentLeg.ScheduleIntegrationKey.
+            writer.WriteAttributeString("B1002", "Fuji NK to OR_5/6");  // TmsShipmentLegStatus.TmsShipmentLeg.ScheduleIntegrationKey.
             writer.WriteAttributeString("B1003", "RCHM");               // TmsShipmentLegStatus.TmsLoad.CarrierScac.
             writer.WriteEndElement();
 

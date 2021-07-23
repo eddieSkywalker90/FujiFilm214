@@ -6,10 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FujiFilm214.ChemStarDb.Data
 {
-    public class ChemStarDbContext : DbContext
+    public sealed class ChemStarDbContext : DbContext
     {
         public ChemStarDbContext()
         {
+            Database.SetCommandTimeout(180);
         }
 
         public ChemStarDbContext(DbContextOptions<ChemStarDbContext> options)
@@ -17,12 +18,12 @@ namespace FujiFilm214.ChemStarDb.Data
         {
         }
 
-        public virtual DbSet<VwTmsLoadStopsV1> VwTmsLoadStopsV1s { get; set; }
-        public virtual DbSet<VwTmsLoadsV1> VwTmsLoadsV1s { get; set; }
-        public virtual DbSet<VwTmsShipmentLegStatusesV1> VwTmsShipmentLegStatusesV1s { get; set; }
-        public virtual DbSet<VwTmsShipmentLegsV1> VwTmsShipmentLegsV1s { get; set; }
-        public virtual DbSet<VwWmsTmsOrder> VwWmsTmsOrders { get; set; }
-        public virtual DbSet<VwWmsTmsOrderLine> VwWmsTmsOrderLines { get; set; }
+        public DbSet<VwTmsLoadStopsV1> VwTmsLoadStopsV1s { get; set; }
+        public DbSet<VwTmsLoadsV1> VwTmsLoadsV1s { get; set; }
+        public DbSet<VwTmsShipmentLegStatusesV1> VwTmsShipmentLegStatusesV1s { get; set; }
+        public DbSet<VwTmsShipmentLegsV1> VwTmsShipmentLegsV1s { get; set; }
+        public DbSet<VwWmsTmsOrder> VwWmsTmsOrders { get; set; }
+        public DbSet<VwWmsTmsOrderLine> VwWmsTmsOrderLines { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -98,7 +99,7 @@ namespace FujiFilm214.ChemStarDb.Data
             modelBuilder.Entity<VwTmsShipmentLegStatusesV1>()
                 .HasOne(legstatus => legstatus.ShipmentLeg)
                 .WithMany(leg => leg.ShipmentLegStatuses)
-                .HasForeignKey(status => status.ShipmentLegId);
+                .HasForeignKey(status => status.Id);
 
             modelBuilder.Entity<VwTmsShipmentLegStatusesV1>(entity =>
             {

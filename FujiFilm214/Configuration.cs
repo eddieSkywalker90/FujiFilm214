@@ -18,6 +18,11 @@ namespace FujiFilm214
         // Logging.
         public static readonly string LogsFilePath = Root["Configuration:LogsFilePath"];
         public static readonly string DebugLogsFilePath = Root["Configuration:DebugLogsFilePath"];
+        // Messages.
+        public static readonly string FailMessage = Root["Application:FailMessage"];
+        public static readonly string SuccessMessage = Root["Application:SuccessMessage"];
+        public static readonly string NoChanges = Root["Application:NoChanges"];
+        public static readonly string LoggerFailure = Root["Application:LoggerInitFailed"];
 
         private static IConfigurationRoot Initialize()
         {

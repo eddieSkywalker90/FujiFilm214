@@ -1,5 +1,4 @@
-﻿using System;
-using FujiFilm214.FujiFilm;
+﻿using FujiFilm214.FujiFilm;
 using Serilog;
 using Serilog.Events;
 
@@ -9,8 +8,8 @@ namespace FujiFilm214
     {
         private static void Main(string[] args)
         {
-            try
-            {
+            // try
+            // {
                 Log.Logger = new LoggerConfiguration()
                     .MinimumLevel.Debug()
                     .WriteTo.File(Configuration.DebugLogsFilePath, retainedFileCountLimit: 5, rollingInterval: RollingInterval.Day)
@@ -20,12 +19,14 @@ namespace FujiFilm214
 
                 FujiFilmController fujiFilm214 = new();
                 fujiFilm214.InitializeTriggers(Configuration.ProgramStatusDbConnection, Log.Logger);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+
+                Log.Debug(Configuration.SuccessMessage);
+            // }
+            // catch (Exception e)
+            // {
+            //     Console.WriteLine(e);
+            //     throw;
+            // }
         }
     }
 }

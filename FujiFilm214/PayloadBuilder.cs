@@ -3,18 +3,12 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using FujiFilm214.ChemStarDb.Models;
 
-namespace FujiFilm214.FujiFilm
+namespace FujiFilm214
 {
-    public class FujiFilmXml
+    public static class PayloadBuilder
     {
-        public VwTmsShipmentLegStatusesV1 ShipmentLegStatus;
-
-        public FujiFilmXml(VwTmsShipmentLegStatusesV1 shipmentLegStatus)
-        {
-            ShipmentLegStatus = shipmentLegStatus;
-        }
-
-        public XDocument Build()
+        // the "this" parameter modifier turns this into an extension method of the VwTmsShipmentLegStatusesV1 class
+        public static XDocument BuildFujiFilm214Xml(this VwTmsShipmentLegStatusesV1 shipmentLegStatus)
         {
             var xDoc = new XDocument(
                 new XElement("IX", GetIxAttributes(), //Interchange control header
@@ -38,21 +32,7 @@ namespace FujiFilm214.FujiFilm
             );
             return xDoc;
             /*
-             using var writer = SetupXmlWriter(memoryStream);
-            Console.WriteLine("Date: " + DateTime.Now.ToString("yyyyMMdd"));
-            Console.WriteLine("Time: " + DateTime.Now.ToString("hhmm"));
 
-
-            writer.WriteStartElement("FG");
-            writer.WriteAttributeString("tag", "GS");
-            writer.WriteAttributeString("GS01", "QM");
-            writer.WriteAttributeString("GS02", "RCHM");
-            writer.WriteAttributeString("GS03", "CFEM");
-            writer.WriteAttributeString("GS04", DateTime.Now.ToString("yyyyMMdd"));
-            writer.WriteAttributeString("GS05", DateTime.Now.ToString("hhmm"));  
-            writer.WriteAttributeString("GS06", "id");
-            writer.WriteAttributeString("GS07", "X");
-            writer.WriteAttributeString("GS08", "004010");
 
             writer.WriteStartElement("TX");
             writer.WriteAttributeString("tag", "ST");
@@ -162,7 +142,7 @@ namespace FujiFilm214.FujiFilm
             writer.Close();*/
         }
 
-        private List<XAttribute> GetIxAttributes()
+        private static List<XAttribute> GetIxAttributes()
         {
             return new()
             {
@@ -186,7 +166,7 @@ namespace FujiFilm214.FujiFilm
             };
         }
 
-        private List<XAttribute> GetGsAttributes()
+        private static List<XAttribute> GetGsAttributes()
         {
             var now = DateTime.Now;
             return new List<XAttribute>

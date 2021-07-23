@@ -7,10 +7,14 @@ using JankyIntegrationManager;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
-namespace FujiFilm214.FujiFilm
+namespace FujiFilm214
 {
-    public class FujiFilmController : DeltaCheckIntegrationManager<XDocument>
+    public class FujiFilm214IntegrationManager : DeltaCheckIntegrationManager<XDocument>
     {
+        public FujiFilm214IntegrationManager() : base(Configuration.Root)
+        {
+        }
+
         /// <summary>
         ///     Call associated SQL View to return list of potentially new/updated records.
         /// </summary>
@@ -40,11 +44,12 @@ namespace FujiFilm214.FujiFilm
         /// <param name="statusId"></param>
         /// <param name="writer"></param>
         /// <returns></returns>
-        protected override XDocument GetRecordPayload(string statusId)
+        protected override XDocument? GetRecordPayload(string statusId)
         {
             Log.Information("---------------------------------------");
             Log.Information($"GetRecordPayload - {statusId}");
 
+            //Query the relevant data for the statusId
             using ChemStarDbContext dbContext = new();
             var tmsStatuses = dbContext.VwTmsShipmentLegStatusesV1s
                 .Include(status => status.ShipmentLeg)
@@ -55,21 +60,20 @@ namespace FujiFilm214.FujiFilm
                 .OrderByDescending(status => status.UpdatedAt)
                 .Take(1)
                 .ToList();
-
-            var xDocument = new XDocument();
             var tmsStatus = tmsStatuses.FirstOrDefault();
-            var fujiXmlBuilder = new FujiFilmXml(tmsStatus);
-            xDocument = fujiXmlBuilder.Build();
+
             if (tmsStatus != null)
             {
+                //Build out payload with the new data
+                var xDocument = tmsStatus.BuildFujiFilm214Xml();
                 Log.Information(
                     $"{tmsStatus.Id} - {tmsStatus.ShipmentLeg?.ShipperReference} - {tmsStatus.ShipmentLeg?.Load?.LoadGroup} - {tmsStatus.ShipmentLeg?.PickUpStop?.LocationCity} - {tmsStatus.ShipmentLeg?.DropOffStop?.LocationCity}");
                 Log.Information(
                     $"\n{xDocument}");
+                return xDocument;
             }
 
-
-            return xDocument;
+            return null;
         }
     }
 }

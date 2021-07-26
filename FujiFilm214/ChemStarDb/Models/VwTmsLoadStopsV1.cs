@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 #nullable disable
 
@@ -34,5 +35,7 @@ namespace FujiFilm214.ChemStarDb.Models
         public int? FileId { get; set; }
 
         public VwTmsLoadsV1 Load { get; set; }
+        public ICollection<VwTmsShipmentLegsV1> PickUpShipmentLegs { get; set; }
+        public ICollection<VwTmsShipmentLegsV1> DropOffShipmentLegs { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using FujiFilm214.ChemStarDb.Data;
 using JankyIntegrationManager;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 
 namespace FujiFilm214.FujiFilm
@@ -111,6 +112,10 @@ namespace FujiFilm214.FujiFilm
             #endregion
 
             return xmlDataStream;
+        }
+
+        public FujiFilmController(IConfigurationRoot configurationRoot) : base(configurationRoot)
+        {
         }
     }
 }

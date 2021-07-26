@@ -17,10 +17,10 @@ namespace FujiFilm214
                     .WriteTo.Console(LogEventLevel.Debug)
                     .CreateLogger();
 
-                FujiFilmController fujiFilm214 = new();
-                fujiFilm214.InitializeTriggers(Configuration.ProgramStatusDbConnection, Log.Logger);
+                FujiFilmController fujiFilm214 = new(Configuration.Root);
+                fujiFilm214.Start();
 
-                Log.Debug(Configuration.SuccessMessage);
+                Log.Information(Configuration.SuccessMessage);
             // }
             // catch (Exception e)
             // {

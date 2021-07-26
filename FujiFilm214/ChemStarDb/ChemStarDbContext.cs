@@ -54,7 +54,7 @@ namespace FujiFilm214.ChemStarDb.Data
 
             //Set model relationships
             modelBuilder.Entity<VwTmsShipmentLegStatusesV1>()
-                .HasOne(legstatus => legstatus.ShipmentLeg)
+                .HasOne(legStatus => legStatus.ShipmentLeg)
                 .WithMany(leg => leg.ShipmentLegStatuses)
                 .HasForeignKey(status => status.ShipmentLegId);
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using FujiFilm214.ChemStarDb.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 #nullable disable
 
@@ -21,16 +20,10 @@ namespace FujiFilm214.ChemStarDb.Data
         public virtual DbSet<VwTmsShipmentLegStatusesV1> VwTmsShipmentLegStatusesV1s { get; set; }
         public virtual DbSet<VwTmsShipmentLegsV1> VwTmsShipmentLegsV1s { get; set; }
 
-        public static readonly LoggerFactory _myLoggerFactory =
-            new();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseLoggerFactory(_myLoggerFactory);
-                optionsBuilder.UseSqlServer(Configuration.ChemStarDbConnection);
-            }
+            if (!optionsBuilder.IsConfigured) optionsBuilder.UseSqlServer(Configuration.ChemStarDbConnection);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

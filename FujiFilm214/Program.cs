@@ -20,7 +20,7 @@ namespace FujiFilm214
                     .CreateLogger();
 
                 FujiFilm214IntegrationManager integrationManager = new();
-                integrationManager.InitializeTriggers(Configuration.ProgramStatusDbConnection);
+                integrationManager.Start();
             }
             catch (Exception e)
             {

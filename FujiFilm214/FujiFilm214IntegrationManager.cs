@@ -25,8 +25,8 @@ namespace FujiFilm214
             Console.WriteLine("IdentifyPotentiallyChangedRecordIds() - Returning list of record entries..\n");
 
             // Access ChemStar DB to pull data
-            using ChemStarDbContext dbContext = new();
-            var changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
+            using ChemStarDbContext chemStarDb = new();
+            var changedStatuses = chemStarDb.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
 
             // Grab each entries ID as the RecordId.
             List<string> changedStatusIds = new();
@@ -50,8 +50,8 @@ namespace FujiFilm214
             Log.Information($"GetRecordPayload - {statusId}");
 
             //Query the relevant data for the statusId
-            using ChemStarDbContext dbContext = new();
-            var tmsStatuses = dbContext.VwTmsShipmentLegStatusesV1s
+            using ChemStarDbContext chemStarDb = new();
+            var tmsStatuses = chemStarDb.VwTmsShipmentLegStatusesV1s
                 .Include(status => status.ShipmentLeg)
                 .ThenInclude(shipmentLeg => shipmentLeg.Load)
                 .Include(status => status.ShipmentLeg.PickUpStop)
@@ -68,12 +68,17 @@ namespace FujiFilm214
                 var xDocument = tmsStatus.BuildFujiFilm214Xml();
                 Log.Information(
                     $"{tmsStatus.Id} - {tmsStatus.ShipmentLeg?.ShipperReference} - {tmsStatus.ShipmentLeg?.Load?.LoadGroup} - {tmsStatus.ShipmentLeg?.PickUpStop?.LocationCity} - {tmsStatus.ShipmentLeg?.DropOffStop?.LocationCity}");
-                Log.Information(
-                    $"\n{xDocument}");
                 return xDocument;
             }
 
             return null;
+        }
+
+        protected override bool ProcessPayload(XDocument payload)
+        {
+            Log.Information(
+                $"\n{payload}");
+            return true;
         }
     }
 }

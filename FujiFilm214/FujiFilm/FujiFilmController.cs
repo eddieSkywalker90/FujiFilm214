@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
+using System.Xml.Linq;
 using FujiFilm214.ChemStarDb.Data;
 using JankyIntegrationManager;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 
 namespace FujiFilm214.FujiFilm
 {
-    public class FujiFilmController : DeltaCheckIntegrationManager<MemoryStream>
+    public class FujiFilmController : DeltaCheckIntegrationManager<XDocument>
     {
+        public FujiFilmController(IConfigurationRoot configurationRoot) : base(configurationRoot)
+        {
+        }
+
         /// <summary>
         ///     Call associated SQL View to return list of potentially new/updated records.
         /// </summary>
@@ -21,20 +25,20 @@ namespace FujiFilm214.FujiFilm
         {
             // Access ChemStar DB to pull data
             using ChemStarDbContext dbContext = new();
-            var wmsTmsOrders = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
+            var changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
 
             // Grab each entries ID as the RecordId.
-            List<string> newOrUpdatedRecords = new();
-            foreach (var recordEntry in wmsTmsOrders)
+            List<string> newOrUpdatedRecordsIds = new();
+            foreach (var status in changedStatuses)
             {
-                newOrUpdatedRecords.Add(recordEntry.Id);
+                newOrUpdatedRecordsIds.Add(status.Id);
 
                 // Dev-only environment.
-                if (Configuration.Environment.Equals("Development")) Log.Debug($"New/Updated RecordIDs: {recordEntry.Id}");
+                if (Configuration.Environment.Equals("Development")) Log.Debug($"New/Updated Status RecordID: {status.Id}");
             }
-            Log.Debug($"IdentifyPotentiallyChangedRecordIds() - Returning list of { wmsTmsOrders.Count} record entries..");
+            Log.Debug($"IdentifyPotentiallyChangedRecordIds() - Returning list of { changedStatuses.Count} record entries..");
 
-            return newOrUpdatedRecords;
+            return newOrUpdatedRecordsIds;
         }
 
         /// <summary>
@@ -42,80 +46,42 @@ namespace FujiFilm214.FujiFilm
         ///     query the SQLDW database to create a payload from joining matching recordID's in associated tables.
         /// </summary>
         /// <param name="recordId"></param>
-        /// <param name="writer"></param>
         /// <returns></returns>
-        protected override MemoryStream GetRecordPayload(string recordId)
+        protected override XDocument GetRecordPayload(string recordId)
         {
             Log.Debug($"GetRecordPayload() - Building XML for record #: {recordId}..");
-            MemoryStream xmlDataStream = new();
-            FujiFilmXml xml = new();
-            xml.Build(xmlDataStream, recordId);
-            Log.Debug(Encoding.UTF8.GetString(xmlDataStream.ToArray()) + "\n");
 
-            #region Old Soon To Be Deleted..
+            using ChemStarDbContext dbContext = new();
+            var tmsStatuses = dbContext.VwTmsShipmentLegStatusesV1s
+                .Include(status => status.ShipmentLeg)
+                .ThenInclude(shipmentLeg => shipmentLeg.Load)
+                .Include(status => status.ShipmentLeg.PickUpStop)
+                .Include(status => status.ShipmentLeg.DropOffStop)
+                .Where(status => status.Id == recordId)
+                .OrderByDescending(status => status.UpdatedAt)
+                .Take(1)
+                .ToList();
 
-            // var shipmentLegStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Select(order => order.Id.Equals("617383252"));
-            // var shipmentLegs = dbContext.VwTmsShipmentLegsV1s.Select(order => order.Id.Equals("279165848"));
-            // var pickUpStops = dbContext.VwTmsLoadStopsV1s.Select(order => order.Id.Equals("274489973"));
-            // var dropOffStops = dbContext.VwTmsLoadStopsV1s.Select(order => order.Id.Equals("274489974"));
-            // var loadIds = dbContext.VwTmsLoadsV1s.Select(order => order.Id.Equals("125146648"));
+            var shipmentLegStatus = tmsStatuses.FirstOrDefault();
+            FujiFilmXml xmlBuilder = new(shipmentLegStatus);
+            var xDoc = xmlBuilder.Build();
 
+            if (shipmentLegStatus != null)
+            {
+                Log.Information(
+                    $"{shipmentLegStatus.Id} - {shipmentLegStatus.ShipmentLeg?.ShipperReference} - {shipmentLegStatus.ShipmentLeg?.Load?.LoadGroup} - {shipmentLegStatus.ShipmentLeg?.PickUpStop?.LocationCity} - {shipmentLegStatus.ShipmentLeg?.DropOffStop?.LocationCity}");
+                Log.Information(
+                    $"\n{xDoc}");
+            }
+            // Log.Debug(shipmentLegStatus.ShipmentLeg.PickUpStop.Id);
 
-            // var legList = dbContext.VwTmsLoadsV1s
-            //     .Take(10)
-            //     .Include(load => load.ShipmentLegs).ToList();
-            //
-            // foreach (var leg in legList)
-            // {
-            //     Console.WriteLine("LegID: " + leg.Id);
-            // }
-
-
-            // ID: 617383252
-            // var legStatus = dbContext.VwTmsLoadsV1s
-            //     .Where(load => load.Id.Equals(617383252))
-            //     .Where()
-
-
-            // // Returns list containing all items matching recordId. Typically 1 response, but could be multiple.
-            // var orderLines = dbContext.VwWmsTmsOrderLines.Where(order => order.Id.ToString().Equals(recordId)).ToList();
-            //
-            // if (orderLines.Count == 1)
-            // {
-            //     // Combine tables and build into payload.
-            //     payload.Id = orderLines.First().Id;
-            //     payload.Sku = orderLines.First().Sku;
-            //     payload.EstimatedShipDate = orderLines.First().ModStamp;
-            //
-            //     return payload;
-            // }
-            //
-            // // Grab most recent entry [by date] as the payload.
-            // var firstPass = true;
-            // var mostRecentDate = DateTime.UnixEpoch;
-            // foreach (var order in orderLines)
-            //     if (firstPass)
-            //     {
-            //         mostRecentDate = order.CreateStamp;
-            //         firstPass = false;
-            //     }
-            //     else
-            //     {
-            //         if (order.CreateStamp > mostRecentDate) mostRecentDate = order.CreateStamp;
-            //     }
-            //
-            // var latestOrderLine = orderLines.Find(order => order.ModStamp.Equals(mostRecentDate));
-            // payload.Id = latestOrderLine.Id;
-            // payload.Sku = latestOrderLine.Sku;
-            // payload.EstimatedShipDate = latestOrderLine.ModStamp;
-
-            #endregion
-
-            return xmlDataStream;
+            return xDoc;
         }
 
-        public FujiFilmController(IConfigurationRoot configurationRoot) : base(configurationRoot)
+        protected override void UploadToFtp(XDocument payload)
         {
+            Log.Debug("UploadToFtp() - Uploading to FTP..");
+            // throw new NotImplementedException();
         }
     }
 }

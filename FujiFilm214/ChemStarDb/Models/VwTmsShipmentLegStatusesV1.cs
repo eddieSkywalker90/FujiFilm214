@@ -23,7 +23,6 @@ namespace FujiFilm214.ChemStarDb.Models
         public DateTime? StatusDate { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-
         public VwTmsShipmentLegsV1 ShipmentLeg { get; set; }
     }
 }

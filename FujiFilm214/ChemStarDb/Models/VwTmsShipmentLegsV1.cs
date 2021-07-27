@@ -9,17 +9,17 @@ namespace FujiFilm214.ChemStarDb.Models
     {
         public string Id { get; set; }
         public string ShipmentId { get; set; }
-        public int? LoadId { get; set; }
+        public string LoadId { get; set; }
         public string ShipperReference { get; set; }
         public string ScheduleIntegrationKey { get; set; }
         public string StatusDescription { get; set; }
         public int? StatusDescriptionId { get; set; }
         public int? ShipmentSequence { get; set; }
         public int? WarehouseLoadingSequence { get; set; }
-        public int? Distance { get; set; }
+        public decimal? Distance { get; set; }
         public string DistanceUnit { get; set; }
         public string PickUpStopId { get; set; }
-        public int? DropOffStopId { get; set; }
+        public string DropOffStopId { get; set; }
         public string TmsPlanningAbility { get; set; }
         public int? TmsPlanningAbilityId { get; set; }
         public decimal? BillableAllocation { get; set; }
@@ -27,7 +27,6 @@ namespace FujiFilm214.ChemStarDb.Models
         public decimal? PayableAllocation { get; set; }
         public string PayableAllocationCurrencyCode { get; set; }
         public DateTime? UpdatedAt { get; set; }
-
         public VwTmsLoadsV1 Load { get; set; }
         public VwTmsLoadStopsV1 PickUpStop { get; set; }
         public VwTmsLoadStopsV1 DropOffStop { get; set; }

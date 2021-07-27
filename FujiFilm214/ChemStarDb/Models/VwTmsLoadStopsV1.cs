@@ -12,6 +12,11 @@ namespace FujiFilm214.ChemStarDb.Models
         public int? StopNumber { get; set; }
         public string StopType { get; set; }
         public string LocationId { get; set; }
+        public DateTime? EstimatedArrivalDate { get; set; }
+        public DateTime? EstimatedDepartureDate { get; set; }
+        public DateTime? ActualArrivalDate { get; set; }
+        public DateTime? ActualDepartureDate { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public string LocationName { get; set; }
         public string LocationAddress1 { get; set; }
         public string LocationAddress2 { get; set; }
@@ -20,22 +25,9 @@ namespace FujiFilm214.ChemStarDb.Models
         public string LocationState { get; set; }
         public int? LocationZip { get; set; }
         public string LocationCountry { get; set; }
-        public string MergeDate { get; set; }
-        public string LocationRef { get; set; }
-        public string Name { get; set; }
-        public string Address1 { get; set; }
-        public string Address2 { get; set; }
-        public string Address3 { get; set; }
-        public string City { get; set; }
-        public string State { get; set; }
-        public int? Zip { get; set; }
-        public string Country { get; set; }
-        public string IsPoolPoint { get; set; }
-        public DateTime? FileDate { get; set; }
-        public int? FileId { get; set; }
 
         public VwTmsLoadsV1 Load { get; set; }
-        public ICollection<VwTmsShipmentLegsV1> PickUpShipmentLegs { get; set; }
         public ICollection<VwTmsShipmentLegsV1> DropOffShipmentLegs { get; set; }
+        public ICollection<VwTmsShipmentLegsV1> PickUpShipmentLegs { get; set; }
     }
 }

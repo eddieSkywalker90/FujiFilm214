@@ -34,9 +34,12 @@ namespace FujiFilm214.FujiFilm
                 newOrUpdatedRecordsIds.Add(status.Id);
 
                 // Dev-only environment.
-                if (Configuration.Environment.Equals("Development")) Log.Debug($"New/Updated Status RecordID: {status.Id}");
+                if (Configuration.Environment.Equals("Development"))
+                    Log.Debug($"New/Updated Status RecordID: {status.Id}");
             }
-            Log.Debug($"IdentifyPotentiallyChangedRecordIds() - Returning list of { changedStatuses.Count} record entries..");
+
+            Log.Debug(
+                $"IdentifyPotentiallyChangedRecordIds() - Returning list of {changedStatuses.Count} record entries..");
 
             return newOrUpdatedRecordsIds;
         }
@@ -78,10 +81,23 @@ namespace FujiFilm214.FujiFilm
             return xDoc;
         }
 
-        protected override void UploadToFtp(XDocument payload)
+        /// <summary>
+        ///     Any finalizing tasks to be done with current XML payload before
+        ///     moving on to the next. (i.e. emails, ftp upload, etc.)
+        /// </summary>
+        /// <param name="payload"></param>
+        protected override void HandlePayload(XDocument payload)
         {
-            Log.Debug("UploadToFtp() - Uploading to FTP..");
-            // throw new NotImplementedException();
+            SftpManager sftp = new(
+                Configuration.Host,
+                Convert.ToInt32(Configuration.Port), 
+                Configuration.Username, 
+                Configuration.Password,
+                Configuration.Filename,
+                Configuration.FtpDirectory,
+                Configuration.AlternateFtpDirectory);
+
+            sftp.Upload(payload);
         }
     }
 }

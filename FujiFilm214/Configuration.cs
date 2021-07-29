@@ -30,6 +30,13 @@ namespace FujiFilm214
         public static readonly string Filename = Root["Ftp:FilenameWithExtension"];
         public static readonly string FtpDirectory = Root["Ftp:FtpDirectory"];
         public static readonly string AlternateFtpDirectory = Root["Ftp:AlternateFtpDirectory"];
+        // Email.
+        public static readonly string ToEmail = Root["Email:ToEmail"];
+        public static readonly string EmailUsername = Root["Email:Username"];
+        public static readonly string EmailPassword = Root["Email:Password"];
+        public static readonly string FromEmail = Root["Email:FromEmail"];
+        public static readonly string Subject = Root["Email:Subject"];
+        public static readonly string Message = Root["Email:Message"];
 
         private static IConfigurationRoot Initialize()
         {

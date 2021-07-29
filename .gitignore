@@ -352,3 +352,4 @@ MigrationBackup/
 appsettings.*.json
 launchsettings.json
 Logs/
+nuget.config

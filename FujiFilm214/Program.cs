@@ -9,6 +9,7 @@ namespace FujiFilm214
     {
         private static void Main(string[] args)
         {
+
             try
             {
                 Log.Logger = new LoggerConfiguration()
@@ -17,17 +18,24 @@ namespace FujiFilm214
                     .WriteTo.File(Configuration.LogsFilePath, LogEventLevel.Information, retainedFileCountLimit: 5, rollingInterval: RollingInterval.Day)
                     .WriteTo.Console(LogEventLevel.Debug)
                     .CreateLogger();
-                throw new Exception();
 
-                FujiFilmController fujiFilm214 = new(Configuration.Root);
-                fujiFilm214.Start();
+                try
+                {
+                    FujiFilmController fujiFilm214 = new(Configuration.Root);
+                    fujiFilm214.Start();
 
-                Log.Information(Configuration.SuccessMessage);
+                    Log.CloseAndFlush();
+                    Log.Information(Configuration.SuccessMessage);
+                }
+                catch (Exception e)
+                {
+                    EmailHandler.EmailManager.SendEmail(EmailHandler.AlertMessage);
+                    Log.Information(e, Configuration.FailMessage);
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.StackTrace);
-                EmailHandler.EmailManager.SendEmail(EmailHandler.AlertMessage);
+                Console.WriteLine(Configuration.LoggerFailure + " " + e.Message);
             }
         }
     }

@@ -20,17 +20,17 @@ namespace FujiFilm214.FujiFilm
         public XDocument Build()
         {
             var xDoc = new XDocument(
-                new XElement("IX", GetIxAttributes(), // Interchange control header.
-                    new XElement("FG", GetGsAttributes(), // Functional header.
-                        new XElement("TX", // Start transaction.
-                            new XElement("B10", GetB10Attributes()), // Carrier and Ref Id.
-                            new XElement("L11", GetL11Attributes()), // BOL ref num.
-                            new XElement("L11", GetSecondL11Attributes()), // Pro ref num.
-                            new XElement("LXLoop1", // Statuses loop.
-                                new XElement("LX", GetLxAttributes()), // Status num.
-                                new XElement("AT7Loop1", // Status details loop.
-                                    new XElement("AT7", GetAt7Attributes()), // Status code and dates.
-                                    new XElement("MS1", GetMs1Attributes()), // Equipment location.
+                new XElement("IX", GetIxAttributes(),                       // Interchange control header.
+                    new XElement("FG", GetGsAttributes(),                   // Functional header.
+                        new XElement("TX",                                  // Start transaction.
+                            new XElement("B10", GetB10Attributes()),        // Carrier and Ref Id.
+                            new XElement("L11", GetL11Attributes()),        // BOL ref num.
+                            new XElement("L11", GetSecondL11Attributes()),  // Pro ref num.
+                            new XElement("LXLoop1",                         // Statuses loop.
+                                new XElement("LX", GetLxAttributes()),      // Status num.
+                                new XElement("AT7Loop1",                    // Status details loop.
+                                    new XElement("AT7", GetAt7Attributes()),// Status code and dates.
+                                    new XElement("MS1", GetMs1Attributes()),// Equipment location.
                                     new XElement("MS2", GetMs2Attributes()) // Equipment owner.
                                 ),
                                 new XElement("L11_3", GetL11_3Attributes()) // Some random reference number??
@@ -141,13 +141,32 @@ namespace FujiFilm214.FujiFilm
 
         private List<XAttribute> GetMs1Attributes()
         {
-            return new()
+            if (ShipmentLegStatus.StatusAction.ToUpper().Contains("PICK"))
             {
-                new XAttribute("tag", "MS1"), //Refer to doc
-                new XAttribute("MS101", ShipmentLegStatus.StatusCode),
-                new XAttribute("MS102", ""),
-                new XAttribute("MS103", "")
+                return new List<XAttribute>
+                {
+                    new("tag", "MS1"), 
+                    new("MS101", ""),//TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.PickUpStop.LocationCity)),
+                    new("MS102", ""),//TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.PickUpStop.LocationState)),
+                    new("MS103", "") //TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.PickUpStop.LocationCountry))
+                };
+            }
+
+            return new List<XAttribute>
+            {
+                new("tag", "MS1"),
+                new("MS101", ""),//TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.DropOffStop.LocationCity)""),
+                new("MS102", ""),//TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.DropOffStop.LocationState)),
+                new("MS103", "") //TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.DropOffStop.LocationCountry))
             };
+        }
+
+        //TEMP METHOD ATM USED TO RETURN EMPTY STR IF NULL. WASN'T WORKING FOR ME SO I JUST FORCED EMPTY STR ABOVE, FOR NOW.
+        private static object TemporaryNullChecker(string argument)
+        {
+            if (string.IsNullOrEmpty(argument))
+                return "";
+            return argument;
         }
 
         private List<XAttribute> GetMs2Attributes()

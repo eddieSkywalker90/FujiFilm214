@@ -20,10 +20,15 @@ namespace FujiFilm214
 
                 try
                 {
+                    // Dev-only environment.
+                    if (Configuration.Environment.Equals("Development"))
+                        Console.WriteLine("***** DEVELOPMENT ENVIRONMENT DETECTED *****\n" +
+                                          "Returned amount of changed statuses in IdentifyPotentiallyChangedRecordIds()\n" +
+                                          "has been reduced to 3 in order to finish execution sooner for debug purposes.\n");
+
                     FujiFilmController fujiFilm214 = new(Configuration.Root);
                     fujiFilm214.Start();
 
-                    Log.CloseAndFlush();
                     Log.Information(Configuration.SuccessMessage);
                 }
                 catch (Exception e)
@@ -31,10 +36,11 @@ namespace FujiFilm214
                     EmailHandler.EmailManager.SendEmail(EmailHandler.AlertMessage);
                     Log.Information(e, Configuration.FailMessage);
                 }
+                finally { Log.CloseAndFlush(); }
             }
             catch (Exception e)
             {
-                Console.WriteLine(Configuration.LoggerFailure + " " + e.Message);
+                Console.WriteLine(Configuration.LoggerFailure + " " + e.StackTrace);
             }
         }
     }

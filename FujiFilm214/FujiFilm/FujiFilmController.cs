@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using FujiFilm214.ChemStarDb.Data;
+using FujiFilm214.ChemStarDb.Models;
 using JankyIntegrationManager;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,12 @@ using Serilog;
 
 namespace FujiFilm214.FujiFilm
 {
+    /// <summary>
+    ///     This class implements the DeltaIntegrationManager and therefore the IntegrationManager
+    ///     from the JankyIntegrationManager project. This class main intention is to fill out the needed
+    ///     methods the meta project requires in order to build the change status payloads and ship off to
+    ///     the data to an expected destination.
+    /// </summary>
     public class FujiFilmController : DeltaCheckIntegrationManager<XDocument>
     {
         public FujiFilmController(IConfigurationRoot configurationRoot) : base(configurationRoot)
@@ -27,21 +34,21 @@ namespace FujiFilm214.FujiFilm
             {
                 // Access ChemStar DB to pull data.
                 using ChemStarDbContext dbContext = new();
-                var changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
+                List<VwTmsShipmentLegStatusesV1> changedStatuses;
+
+                // Dev-only environment.
+                if (Configuration.Environment.Equals("Development"))
+                    changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
+                else // Production environment returns all.
+                    changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.ToList();
 
                 // Grab each entries ID as the RecordId.
                 List<string> newOrUpdatedRecordsIds = new();
                 foreach (var status in changedStatuses)
                 {
                     newOrUpdatedRecordsIds.Add(status.Id);
-
-                    // Dev-only environment.
-                    if (Configuration.Environment.Equals("Development"))
-                        Log.Debug($"New/Updated Status RecordID: {status.Id}");
                 }
-
-                Log.Information(
-                    $"Returning list of {changedStatuses.Count} record entries..");
+                Log.Information($"Returning list of {changedStatuses.Count} record entries..");
 
                 return newOrUpdatedRecordsIds;
             }
@@ -50,7 +57,6 @@ namespace FujiFilm214.FujiFilm
                 Log.Debug(e, "Access to ChemStar database to retrieve status changes failed.");
                 throw;
             }
-
         }
 
         /// <summary>
@@ -83,13 +89,11 @@ namespace FujiFilm214.FujiFilm
                 FujiFilmXml xmlBuilder = new(shipmentLegStatus);
                 var xDoc = xmlBuilder.Build();
 
-                if (shipmentLegStatus != null)
-                {
-                    Log.Information(
-                        $"{shipmentLegStatus.Id} - {shipmentLegStatus.ShipmentLeg?.ShipperReference} - {shipmentLegStatus.ShipmentLeg?.Load?.LoadGroup} - {shipmentLegStatus.ShipmentLeg?.PickUpStop?.LocationCity} - {shipmentLegStatus.ShipmentLeg?.DropOffStop?.LocationCity}");
-                    Log.Information($"\n{xDoc}");
-                }
-                // Log.Debug("TEST:" + shipmentLegStatus.ShipmentLeg.PickUpStop.Id);
+                if (shipmentLegStatus == null) return xDoc;
+
+                Log.Debug(
+                    $"{shipmentLegStatus.Id} - {shipmentLegStatus.ShipmentLeg?.ShipperReference} - {shipmentLegStatus.ShipmentLeg?.Load?.LoadGroup} - {shipmentLegStatus.ShipmentLeg?.PickUpStop?.LocationCity} - {shipmentLegStatus.ShipmentLeg?.DropOffStop?.LocationCity}");
+                Log.Debug($"\n{xDoc}");
 
                 return xDoc;
             }

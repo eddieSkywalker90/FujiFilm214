@@ -25,7 +25,7 @@ namespace FujiFilm214.FujiFilm
         {
             try
             {
-                // Access ChemStar DB to pull data
+                // Access ChemStar DB to pull data.
                 using ChemStarDbContext dbContext = new();
                 var changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
 

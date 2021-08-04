@@ -9,7 +9,6 @@ namespace FujiFilm214
     {
         private static void Main(string[] args)
         {
-
             try
             {
                 Log.Logger = new LoggerConfiguration()

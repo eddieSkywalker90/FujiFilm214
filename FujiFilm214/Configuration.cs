@@ -12,7 +12,6 @@ namespace FujiFilm214
 
         public static readonly string Environment = System.Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
         // Database.
-        public static readonly string ProgramStatusDbConnection = Root["ConnectionStrings:SqlLiteDb"];
         public static readonly string ChemStarDbConnection = Root["ConnectionStrings:ChemStarDb"];
         // Logging.
         public static readonly string LogsFilePath = Root["Configuration:LogsFilePath"];
@@ -20,7 +19,6 @@ namespace FujiFilm214
         // Messages.
         public static readonly string FailMessage = Root["Application:FailMessage"];
         public static readonly string SuccessMessage = Root["Application:SuccessMessage"];
-        public static readonly string NoChanges = Root["Application:NoChanges"];
         public static readonly string LoggerFailure = Root["Application:LoggerInitFailed"];
         // Ftp.
         public static readonly string Host = Root["Ftp:Host"];

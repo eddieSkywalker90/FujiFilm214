@@ -1,4 +1,4 @@
-﻿using Janky.EmailManager;
+﻿using Janky.Utilities.EmailManager;
 
 namespace FujiFilm214
 {

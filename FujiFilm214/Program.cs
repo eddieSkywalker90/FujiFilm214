@@ -34,13 +34,13 @@ namespace FujiFilm214
                 catch (Exception e)
                 {
                     EmailHandler.EmailManager.SendEmail(EmailHandler.AlertMessage);
-                    Log.Information(e, Configuration.FailMessage);
+                    Log.Information(e, Configuration.FailMessage + " " + e.StackTrace);
                 }
                 finally { Log.CloseAndFlush(); }
             }
             catch (Exception e)
             {
-                Console.WriteLine(Configuration.LoggerFailure + " " + e.StackTrace);
+                Console.WriteLine(Configuration.LoggerFailure + " " + e.Message + " " + e.StackTrace);
             }
         }
     }

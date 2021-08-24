@@ -35,6 +35,11 @@ namespace FujiFilm214
         public static readonly string FromEmail = Root["Email:FromEmail"];
         public static readonly string Subject = Root["Email:Subject"];
         public static readonly string Message = Root["Email:Message"];
+        // Web Service.
+        public static readonly string XmlToEdiServiceAddress = Root["WebService:XmlToEdiServiceAddress"];
+        public static readonly string EdiToXmlServiceAddress = Root["WebService:EdiToXmlServiceAddress"];
+        public static readonly string X12Document = Root["WebService:X12Document"];
+        public static readonly string X12Version = Root["WebService:X12Version"];
 
         private static IConfigurationRoot Initialize()
         {

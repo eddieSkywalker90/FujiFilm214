@@ -11,15 +11,19 @@ namespace FujiFilm214
         public static IConfigurationRoot Root = Initialize();
 
         public static readonly string Environment = System.Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+
         // Database.
         public static readonly string ChemStarDbConnection = Root["ConnectionStrings:ChemStarDb"];
+
         // Logging.
         public static readonly string LogsFilePath = Root["Configuration:LogsFilePath"];
         public static readonly string DebugLogsFilePath = Root["Configuration:DebugLogsFilePath"];
+
         // Messages.
         public static readonly string FailMessage = Root["Application:FailMessage"];
         public static readonly string SuccessMessage = Root["Application:SuccessMessage"];
         public static readonly string LoggerFailure = Root["Application:LoggerInitFailed"];
+
         // Ftp.
         public static readonly string Host = Root["Ftp:Host"];
         public static readonly string Port = Root["Ftp:Port"];
@@ -28,6 +32,7 @@ namespace FujiFilm214
         public static readonly string Filename = Root["Ftp:FilenameWithExtension"];
         public static readonly string FtpDirectory = Root["Ftp:FtpDirectory"];
         public static readonly string AlternateFtpDirectory = Root["Ftp:AlternateFtpDirectory"];
+
         // Email.
         public static readonly string ToEmail = Root["Email:ToEmail"];
         public static readonly string EmailUsername = Root["Email:Username"];
@@ -35,6 +40,7 @@ namespace FujiFilm214
         public static readonly string FromEmail = Root["Email:FromEmail"];
         public static readonly string Subject = Root["Email:Subject"];
         public static readonly string Message = Root["Email:Message"];
+
         // Web Service.
         public static readonly string XmlToEdiServiceAddress = Root["WebService:XmlToEdiServiceAddress"];
         public static readonly string EdiToXmlServiceAddress = Root["WebService:EdiToXmlServiceAddress"];
@@ -53,7 +59,7 @@ namespace FujiFilm214
                 .AddJsonFile($"appsettings.{devEnvironment}.json", true, true)
                 .AddEnvironmentVariables()
                 .Build();
-        
+
             return Root;
         }
     }

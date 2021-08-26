@@ -20,27 +20,27 @@ namespace FujiFilm214.FujiFilm
         public XDocument Build()
         {
             var xDoc = new XDocument(
-                new XElement("Interchange", 
+                new XElement("Interchange",
                     new XElement("Meta", GetIxAttributes()),                                                            // Interchange control header.
                     new XElement("FunctionalGroup",                                                                     // Functional header.
                         new XElement("Meta", GetGsAttributes()),
                         new XElement("TransactionSet",                                                                  // Start transaction.
-                            new XElement("TX-00401-214", new XAttribute("type", "TransactionSet"),                      
+                            new XElement("TX-00401-214", new XAttribute("type", "TransactionSet"),
                                 new XElement("Meta", GetStAttributes()),
                                 new XElement("B10", GetB10Attributes(), new XAttribute("type", "Segment")),             // Carrier and Ref Id.
                                 new XElement("L11", GetL11Attributes(), new XAttribute("type", "Segment")),             // BOL ref num.
                                 new XElement("L11", GetSecondL11Attributes(), new XAttribute("type", "Segment")),       // Pro ref num.
-                                new XElement("LXLoop1", new XAttribute("type", "Loop"),                                 // Statuses loop. 
+                                new XElement("LXLoop1", new XAttribute("type", "Loop"),                                 // Statuses loop.
                                     new XElement("LX", GetLxAttributes(), new XAttribute("type", "Segment")),           // Status num.
                                     new XElement("AT7Loop1", new XAttribute("type", "Loop"),                            // Status details loop.
-                                        new XElement("AT7", GetAt7Attributes(), new XAttribute("type", "Segment")),     // Status code and dates. 
+                                        new XElement("AT7", GetAt7Attributes(), new XAttribute("type", "Segment")),     // Status code and dates.
                                         new XElement("MS1", GetMs1Attributes(), new XAttribute("type", "Segment")),     // Equipment location.
                                         new XElement("MS2", GetMs2Attributes(), new XAttribute("type", "Segment"))      // Equipment owner.
-                                    ), 
+                                    ),
                                     new XElement("L11", GetL11_3Attributes(), new XAttribute("type", "Segment"))      // Some random reference number??
                                 )
                             )
-                        )  
+                        )
                     )
                 )
             );
@@ -76,7 +76,7 @@ namespace FujiFilm214.FujiFilm
                 new("ISA13", "0000000id"),
                 new("ISA14", "0"),
                 new("ISA15", "p"),
-                new("ISA16", ":~")
+                new("ISA16", ":")
             };
         }
 

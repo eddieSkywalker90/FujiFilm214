@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Xml.Linq;
-using FujiFilm214.ChemStarDb.Data;
+using FujiFilm214.ChemStarDb;
 using FujiFilm214.ChemStarDb.Models;
 using Janky.Utilities.Api;
 using Janky.Utilities.Ftp;
@@ -40,7 +40,7 @@ namespace FujiFilm214.FujiFilm
                 List<VwTmsShipmentLegStatusesV1> changedStatuses;
 
                 // Dev-only environment returns limited return to run faster for debugging.
-                if (Configuration.Environment.Equals("Development"))
+                if (Configuration.Environment == "Development")
                     changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Take(1).ToList();
                 else // Production environment returns all.
                     changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.ToList();
@@ -93,10 +93,9 @@ namespace FujiFilm214.FujiFilm
                 var xDoc = xmlBuilder.Build();
 
                 if (shipmentLegStatus == null) return xDoc;
-                
+
                 Log.Debug(
                     $"{shipmentLegStatus.Id} - {shipmentLegStatus.ShipmentLeg?.ShipperReference} - {shipmentLegStatus.ShipmentLeg?.Load?.LoadGroup} - {shipmentLegStatus.ShipmentLeg?.PickUpStop?.LocationCity} - {shipmentLegStatus.ShipmentLeg?.DropOffStop?.LocationCity}");
-                Log.Debug($"\n{xDoc}");
 
                 return xDoc;
             }
@@ -119,14 +118,7 @@ namespace FujiFilm214.FujiFilm
                 // Send payload to EDIConverter to return EDI converted text.
                 var ediService = new EdiServiceConnector();
                 var ediPayload = ediService.ConvertXmlToEdi(payload, Configuration.XmlToEdiServiceAddress, Configuration.X12Version, Configuration.X12Document);
-            }
-            catch
-            {
-                throw new HttpRequestException();
-            }
 
-            try
-            {
                 SftpManager sftp = new(
                     Configuration.Host,
                     Convert.ToInt32(Configuration.Port),
@@ -136,12 +128,11 @@ namespace FujiFilm214.FujiFilm
                     Configuration.FtpDirectory,
                     Configuration.AlternateFtpDirectory);
 
-                sftp.Upload(payload);
+                sftp.Upload(ediPayload);
             }
             catch (HttpRequestException)
             {
-                // Handled already. Throw to top.
-                throw;
+                throw new HttpRequestException();
             }
             catch (Exception e)
             {

@@ -59,28 +59,35 @@ namespace FujiFilm214
         /// </summary>
         private static async Task InitiateCronJob()
         {
-            // construct a scheduler factory using defaults
-            var factory = new StdSchedulerFactory();
+            try
+            {
+                // construct a scheduler factory using defaults
+                var factory = new StdSchedulerFactory();
 
-            // get a scheduler
-            var scheduler = await factory.GetScheduler();
-            await scheduler.Start();
+                // get a scheduler
+                var scheduler = await factory.GetScheduler();
+                await scheduler.Start();
 
-            // define the job and tie it to our HelloJob class
-            var job = JobBuilder.Create<Program>()
-                .WithIdentity("myJob", "group1")
-                .Build();
+                // define the job and tie it to our HelloJob class
+                var job = JobBuilder.Create<Program>()
+                    .WithIdentity("myJob", "group1")
+                    .Build();
 
-            // Trigger the job to run now, and then every 40 seconds
-            var trigger = TriggerBuilder.Create()
-                .WithIdentity("myTrigger", "group1")
-                .StartNow()
-                .WithSimpleSchedule(x => x
-                    .WithIntervalInHours(1)
-                    .RepeatForever())
-                .Build();
+                // Trigger the job to run now, and then every 40 seconds
+                var trigger = TriggerBuilder.Create()
+                    .WithIdentity("myTrigger", "group1")
+                    .StartNow()
+                    .WithSimpleSchedule(x => x
+                        .WithIntervalInHours(1)
+                        .RepeatForever())
+                    .Build();
 
-            await scheduler.ScheduleJob(job, trigger);
+                await scheduler.ScheduleJob(job, trigger);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "InitiateCronJob Setup Failed.");
+            }
         }
 
         /// <summary>
@@ -90,14 +97,28 @@ namespace FujiFilm214
         /// <returns></returns>
         public Task Execute(IJobExecutionContext context)
         {
-            Log.Information("FujiFilm214 Service Starting..");
+            try
+            {
+                Log.Information("FujiFilm214 Service Starting..");
 
-            FujiFilmController fujiFilm214 = new(Configuration.Root);
-            fujiFilm214.Start();
+                FujiFilmController fujiFilm214 = new(Configuration.Root);
+                fujiFilm214.Start();
 
-            Log.Information(Configuration.SuccessMessage);
+                Log.Information(Configuration.SuccessMessage);
 
-            return Task.CompletedTask;
+                return Task.CompletedTask;
+            }
+            catch (Exception e)
+            {
+                EmailHandler.EmailManager.SendEmail(EmailHandler.AlertMessage);
+                Log.Information(Configuration.FailMessage);
+
+                return Task.FromException(e);
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
     }
 }

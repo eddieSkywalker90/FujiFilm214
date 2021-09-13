@@ -68,7 +68,7 @@ namespace FujiFilm214
                 var scheduler = await factory.GetScheduler();
                 await scheduler.Start();
 
-                // define the job and tie it to our HelloJob class
+                // define the job and tie it to our Program class
                 var job = JobBuilder.Create<Program>()
                     .WithIdentity("myJob", "group1")
                     .Build();

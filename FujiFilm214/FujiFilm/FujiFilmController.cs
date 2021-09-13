@@ -116,19 +116,17 @@ namespace FujiFilm214.FujiFilm
             try
             {
                 // Send payload to EDIConverter to return EDI converted text.
-                var ediService = new EdiServiceConnector();
-                var ediPayload = ediService.ConvertXmlToEdi(payload, Configuration.XmlToEdiServiceAddress, Configuration.X12Version, Configuration.X12Document);
+                var ediPayload = EdiServiceConnector.ConvertXmlToEdi(payload, Configuration.XmlToEdiServiceAddress, Configuration.X12Version, Configuration.X12Document);
 
                 SftpManager sftp = new(
                     Configuration.Host,
                     Convert.ToInt32(Configuration.Port),
                     Configuration.Username,
-                    Configuration.Password,
-                    Configuration.Filename,
-                    Configuration.FtpDirectory,
-                    Configuration.AlternateFtpDirectory);
+                    Configuration.Password);
 
-                sftp.Upload(ediPayload);
+                sftp.Upload(ediPayload, Configuration.FtpDirectory, SftpManager.GetTimeStampedFileName(Configuration.Filename));
+
+                // return true;
             }
             catch (HttpRequestException)
             {
@@ -136,7 +134,9 @@ namespace FujiFilm214.FujiFilm
             }
             catch (Exception e)
             {
-                Log.Error(e, "Error uploading to Ftp. Check Configuration data to ensure required inputs are filled in.");
+                Log.Error(e, "Error uploading to Ftp. Check Configuration data to ensure required inputs are filled in.\n" +
+                             $"Service Address: {Configuration.XmlToEdiServiceAddress}\n" +
+                             $"X12Version: {Configuration.X12Version} and X12Document {Configuration.X12Document}");
                 throw;
             }
         }

@@ -26,6 +26,7 @@ namespace FujiFilm214.ChemStarDb.Models
         public string BillableAllocationCurrencyCode { get; set; }
         public decimal? PayableAllocation { get; set; }
         public string PayableAllocationCurrencyCode { get; set; }
+        public string Customer { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public VwTmsLoadsV1 Load { get; set; }
         public VwTmsLoadStopsV1 PickUpStop { get; set; }

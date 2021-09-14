@@ -39,11 +39,13 @@ namespace FujiFilm214.FujiFilm
                 using ChemStarDbContext dbContext = new();
                 List<VwTmsShipmentLegStatusesV1> changedStatuses;
 
-                // Dev-only environment returns limited return to run faster for debugging.
+                // Dev-only environment returns limited return with no specific customer to run faster for debugging.
                 if (Configuration.Environment == "Development")
                     changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
                 else // Production environment returns all.
-                    changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.ToList();
+                    changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s
+                        .Where(status => status.ShipmentLeg.Customer == "FujiFilm" && status.UpdatedAt > startTime)
+                        .ToList();
 
                 // Grab each entries ID as the RecordId.
                 List<string> newOrUpdatedRecordsIds = new();

@@ -20,20 +20,25 @@ namespace FujiFilm214.FujiFilm
         public XDocument Build()
         {
             var xDoc = new XDocument(
-                new XElement("IX", GetIxAttributes(),                       // Interchange control header.
-                    new XElement("FG", GetGsAttributes(),                   // Functional header.
-                        new XElement("TX",                                  // Start transaction.
-                            new XElement("B10", GetB10Attributes()),        // Carrier and Ref Id.
-                            new XElement("L11", GetL11Attributes()),        // BOL ref num.
-                            new XElement("L11", GetSecondL11Attributes()),  // Pro ref num.
-                            new XElement("LXLoop1",                         // Statuses loop.
-                                new XElement("LX", GetLxAttributes()),      // Status num.
-                                new XElement("AT7Loop1",                    // Status details loop.
-                                    new XElement("AT7", GetAt7Attributes()),// Status code and dates.
-                                    new XElement("MS1", GetMs1Attributes()),// Equipment location.
-                                    new XElement("MS2", GetMs2Attributes()) // Equipment owner.
-                                ),
-                                new XElement("L11_3", GetL11_3Attributes()) // Some random reference number??
+                new XElement("Interchange",
+                    new XElement("Meta", GetIxAttributes()),                                                            // Interchange control header.
+                    new XElement("FunctionalGroup",                                                                     // Functional header.
+                        new XElement("Meta", GetGsAttributes()),
+                        new XElement("TransactionSet",                                                                  // Start transaction.
+                            new XElement("TX-00401-214", new XAttribute("type", "TransactionSet"),
+                                new XElement("Meta", GetStAttributes()),
+                                new XElement("B10", GetB10Attributes(), new XAttribute("type", "Segment")),             // Carrier and Ref Id.
+                                new XElement("L11", GetL11Attributes(), new XAttribute("type", "Segment")),             // BOL ref num.
+                                new XElement("L11", GetSecondL11Attributes(), new XAttribute("type", "Segment")),       // Pro ref num.
+                                new XElement("LXLoop1", new XAttribute("type", "Loop"),                                 // Statuses loop.
+                                    new XElement("LX", GetLxAttributes(), new XAttribute("type", "Segment")),           // Status num.
+                                    new XElement("AT7Loop1", new XAttribute("type", "Loop"),                            // Status details loop.
+                                        new XElement("AT7", GetAt7Attributes(), new XAttribute("type", "Segment")),     // Status code and dates.
+                                        new XElement("MS1", GetMs1Attributes(), new XAttribute("type", "Segment")),     // Equipment location.
+                                        new XElement("MS2", GetMs2Attributes(), new XAttribute("type", "Segment"))      // Equipment owner.
+                                    ),
+                                    new XElement("L11", GetL11_3Attributes(), new XAttribute("type", "Segment"))      // Some random reference number??
+                                )
                             )
                         )
                     )
@@ -42,36 +47,44 @@ namespace FujiFilm214.FujiFilm
             return xDoc;
         }
 
-        private List<XAttribute> GetIxAttributes()
+        private List<XElement> GetStAttributes()
         {
             return new()
             {
-                new XAttribute("tag", "ISA"),
-                new XAttribute("ISA01", "00"),
-                new XAttribute("ISA02", "          "),
-                new XAttribute("ISA03", "00"),
-                new XAttribute("ISA04", "          "),
-                new XAttribute("ISA05", "02"),
-                new XAttribute("ISA06", "RCHM           "),
-                new XAttribute("ISA07", "01"),
-                new XAttribute("ISA08", "067888030      "),
-                new XAttribute("ISA09", "210512"),
-                new XAttribute("ISA10", "1613"),
-                new XAttribute("ISA11", "U"),
-                new XAttribute("ISA12", "00401"),
-                new XAttribute("ISA13", "0000000id"),
-                new XAttribute("ISA14", "0"),
-                new XAttribute("ISA15", "p"),
-                new XAttribute("ISA16", ":~")
+                new XElement("ST01", "214"),
+                new XElement("ST02", "0001")
             };
         }
 
-        private List<XAttribute> GetGsAttributes()
+        private List<XElement> GetIxAttributes()
         {
             var now = DateTime.Now;
-            return new List<XAttribute>
+            return new List<XElement>
             {
-                new("tag", "GS"),
+                new("ISA01", "00"),
+                new("ISA02"),
+                new("ISA03", "00"),
+                new("ISA04"),
+                new("ISA05", "02"),
+                new("ISA06", "RCHM "),
+                new("ISA07", "01"),
+                new("ISA08", "067888030 "),
+                new("ISA09", now.ToString("yyMMdd")),
+                new("ISA10", now.ToString("hhmm")),
+                new("ISA11", "U"),
+                new("ISA12", "00401"),
+                new("ISA13", "0000000id"),
+                new("ISA14", "0"),
+                new("ISA15", "p"),
+                new("ISA16", ":")
+            };
+        }
+
+        private List<XElement> GetGsAttributes()
+        {
+            var now = DateTime.Now;
+            return new List<XElement>
+            {
                 new("GS01", "QM"),
                 new("GS02", "RCHM"),
                 new("GS03", "CFEM"),
@@ -83,109 +96,94 @@ namespace FujiFilm214.FujiFilm
             };
         }
 
-        private List<XAttribute> GetB10Attributes()
+        private List<XElement> GetB10Attributes()
         {
             return new()
             {
-                new XAttribute("tag", "B10"),
-                new XAttribute("B1001", ""), //Waiting on doc
-                new XAttribute("B1002", ShipmentLegStatus.ShipmentLeg.ScheduleIntegrationKey),
-                new XAttribute("B1003", ShipmentLegStatus.ShipmentLeg.Load.CarrierScac)
+                new XElement("B1001", ""), //Waiting on doc
+                new XElement("B1002", ShipmentLegStatus.ShipmentLeg.ScheduleIntegrationKey),
+                new XElement("B1003", ShipmentLegStatus.ShipmentLeg.Load.CarrierScac)
             };
         }
 
-        private List<XAttribute> GetL11Attributes()
+        private List<XElement> GetL11Attributes()
         {
             return new()
             {
-                new XAttribute("tag", "L11"),
-                new XAttribute("L1101", ShipmentLegStatus.ShipmentLeg.ScheduleIntegrationKey),
-                new XAttribute("L1102", "BM"),
-                new XAttribute("L1103", "")
+                new XElement("L1101", ShipmentLegStatus.ShipmentLeg.ScheduleIntegrationKey),
+                new XElement("L1102", "BM"),
+                new XElement("L1103", "")
             };
         }
 
-        private List<XAttribute> GetSecondL11Attributes()
+        private List<XElement> GetSecondL11Attributes()
         {
             return new()
             {
-                new XAttribute("tag", "L11"),
-                new XAttribute("L1101", ShipmentLegStatus.LoadId),
-                new XAttribute("L1102", "CN")
+                new XElement("L1101", ShipmentLegStatus.LoadId),
+                new XElement("L1102", "CN")
             };
         }
 
-        private List<XAttribute> GetLxAttributes()
+        private List<XElement> GetLxAttributes()
         {
             return new()
             {
-                new XAttribute("tag", "LX"),
-                new XAttribute("LX01", "1")
+                new XElement("LX01", "1")
             };
         }
 
-        private List<XAttribute> GetAt7Attributes()
+        private List<XElement> GetAt7Attributes()
         {
             return new()
             {
-                new XAttribute("tag", "AT7"),
-                new XAttribute("AT701", ShipmentLegStatus.StatusCode),
-                new XAttribute("AT702", ShipmentLegStatus.ReasonCode),
-                new XAttribute("AT703", ""),
-                new XAttribute("AT704", ""),
-                new XAttribute("AT705", ShipmentLegStatus.StatusDate),
-                new XAttribute("AT706", DateTime.Now.ToString("hhmm")),
-                new XAttribute("AT707", "PT") //Waiting on doc
+                new XElement("AT701", ShipmentLegStatus.StatusCode),
+                new XElement("AT702", ShipmentLegStatus.ReasonCode),
+                new XElement("AT703", ""),
+                new XElement("AT704", ""),
+                new XElement("AT705", ShipmentLegStatus.StatusDate),
+                new XElement("AT706", DateTime.Now.ToString("hhmm")),
+                new XElement("AT707", "PT") //Waiting on doc
             };
         }
 
-        private List<XAttribute> GetMs1Attributes()
+        private List<XElement> GetMs1Attributes()
         {
             if (ShipmentLegStatus.StatusAction.ToUpper().Contains("PICK"))
             {
-                return new List<XAttribute>
+                return new List<XElement>
                 {
-                    new("tag", "MS1"), 
                     new("MS101", ""),//TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.PickUpStop.LocationCity)),
                     new("MS102", ""),//TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.PickUpStop.LocationState)),
                     new("MS103", "") //TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.PickUpStop.LocationCountry))
                 };
             }
 
-            return new List<XAttribute>
+            return new List<XElement>
             {
-                new("tag", "MS1"),
                 new("MS101", ""),//TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.DropOffStop.LocationCity)""),
                 new("MS102", ""),//TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.DropOffStop.LocationState)),
                 new("MS103", "") //TemporaryNullChecker(ShipmentLegStatus.ShipmentLeg.DropOffStop.LocationCountry))
             };
         }
 
-        //TEMP METHOD ATM USED TO RETURN EMPTY STR IF NULL. WASN'T WORKING FOR ME SO I JUST FORCED EMPTY STR ABOVE, FOR NOW.
-        private static object TemporaryNullChecker(string argument)
-        {
-            if (string.IsNullOrEmpty(argument))
-                return "";
-            return argument;
-        }
-
-        private List<XAttribute> GetMs2Attributes()
+        private List<XElement> GetMs2Attributes()
         {
             return new()
             {
-                new XAttribute("tag", "MS2"), //Waiting on doc
-                new XAttribute("MS201", ShipmentLegStatus.ShipmentLeg.Load.CarrierScac),
-                new XAttribute("MS202", "")
+                // new("tag", "MS2"), //Waiting on doc
+                new XElement("MS201", ShipmentLegStatus.ShipmentLeg.Load.CarrierScac),
+                new XElement("MS202", "")
             };
         }
 
-        private List<XAttribute> GetL11_3Attributes()
+        private List<XElement> GetL11_3Attributes()
         {
             return new()
             {
-                new XAttribute("tag", "L11_3"), //Waiting on doc
-                new XAttribute("L1101", "02"),
-                new XAttribute("L1102", "QN")
+                // new("tag", "L11_3"), //Waiting on doc
+                new XElement("L1101", "02"),
+                new XElement("L1102", "QN")
             };
         }
     }

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 
-namespace FujiFilm214.ChemStarDb.Data
+namespace FujiFilm214.ChemStarDb
 {
     public class ChemStarDbContext : DbContext
     {
@@ -19,7 +19,6 @@ namespace FujiFilm214.ChemStarDb.Data
 
         public virtual DbSet<VwTmsShipmentLegStatusesV1> VwTmsShipmentLegStatusesV1s { get; set; }
         public virtual DbSet<VwTmsShipmentLegsV1> VwTmsShipmentLegsV1s { get; set; }
-
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

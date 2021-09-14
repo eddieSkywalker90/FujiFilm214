@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Xml.Linq;
-using FujiFilm214.ChemStarDb.Data;
+using FujiFilm214.ChemStarDb;
 using FujiFilm214.ChemStarDb.Models;
+using Janky.Utilities.Api;
+using Janky.Utilities.Ftp;
 using JankyIntegrationManager;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -36,8 +39,8 @@ namespace FujiFilm214.FujiFilm
                 using ChemStarDbContext dbContext = new();
                 List<VwTmsShipmentLegStatusesV1> changedStatuses;
 
-                // Dev-only environment.
-                if (Configuration.Environment.Equals("Development"))
+                // Dev-only environment returns limited return to run faster for debugging.
+                if (Configuration.Environment == "Development")
                     changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
                 else // Production environment returns all.
                     changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.ToList();
@@ -67,7 +70,7 @@ namespace FujiFilm214.FujiFilm
         /// <returns></returns>
         protected override XDocument GetRecordPayload(string recordId)
         {
-            Log.Debug($"Building XML for record #: {recordId}..");
+            Log.Debug($"Building XML for record #{recordId}..");
 
             try
             {
@@ -92,8 +95,7 @@ namespace FujiFilm214.FujiFilm
                 if (shipmentLegStatus == null) return xDoc;
 
                 Log.Debug(
-                    $"{shipmentLegStatus.Id} - {shipmentLegStatus.ShipmentLeg?.ShipperReference} - {shipmentLegStatus.ShipmentLeg?.Load?.LoadGroup} - {shipmentLegStatus.ShipmentLeg?.PickUpStop?.LocationCity} - {shipmentLegStatus.ShipmentLeg?.DropOffStop?.LocationCity}");
-                Log.Debug($"\n{xDoc}");
+                    $"#{shipmentLegStatus.Id} - {shipmentLegStatus.ShipmentLeg?.ShipperReference} - {shipmentLegStatus.ShipmentLeg?.Load?.LoadGroup} - {shipmentLegStatus.ShipmentLeg?.PickUpStop?.LocationCity} - {shipmentLegStatus.ShipmentLeg?.DropOffStop?.LocationCity}");
 
                 return xDoc;
             }
@@ -109,25 +111,32 @@ namespace FujiFilm214.FujiFilm
         ///     moving on to the next. (i.e. emails, ftp upload, etc.)
         /// </summary>
         /// <param name="payload"></param>
-        protected override void HandlePayload(XDocument payload)
+        protected override bool HandlePayload(XDocument payload)
         {
             try
             {
+                // Send payload to EDIConverter to return EDI converted text.
+                var ediPayload = EdiServiceConnector.ConvertXmlToEdi(payload, Configuration.XmlToEdiServiceAddress, Configuration.X12Version, Configuration.X12Document);
+
                 SftpManager sftp = new(
                     Configuration.Host,
                     Convert.ToInt32(Configuration.Port),
                     Configuration.Username,
-                    Configuration.Password,
-                    Configuration.Filename,
-                    Configuration.FtpDirectory,
+                    Configuration.Password);
 
-                    Configuration.AlternateFtpDirectory);
+                sftp.Upload(ediPayload, Configuration.FtpDirectory, SftpManager.GetTimeStampedFileName(Configuration.Filename));
 
-                sftp.Upload(payload);
+                return true;
+            }
+            catch (HttpRequestException)
+            {
+                throw new HttpRequestException();
             }
             catch (Exception e)
             {
-                Log.Error(e, "Error uploading to Ftp. Check Configuration data to ensure required inputs are filled in.");
+                Log.Error(e, "Error uploading to Ftp. Check Configuration data to ensure required inputs are filled in.\n" +
+                             $"Service Address: {Configuration.XmlToEdiServiceAddress}\n" +
+                             $"X12Version: {Configuration.X12Version} and X12Document {Configuration.X12Document}");
                 throw;
             }
         }

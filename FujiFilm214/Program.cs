@@ -21,26 +21,33 @@ namespace FujiFilm214
                 try
                 {
                     // Dev-only environment.
-                    if (Configuration.Environment.Equals("Development"))
+                    if (Configuration.Environment == "Development")
+                    {
                         Console.WriteLine("***** DEVELOPMENT ENVIRONMENT DETECTED *****\n" +
                                           "Returned amount of changed statuses in IdentifyPotentiallyChangedRecordIds()\n" +
-                                          "has been reduced to 3 in order to finish execution sooner for debug purposes.\n");
+                                          "has been reduced to 1-3 in order to finish execution sooner for debug purposes.\n");
 
-                    FujiFilmController fujiFilm214 = new(Configuration.Root);
-                    fujiFilm214.Start();
+                        Log.Information("FujiFilm214 Service Starting..");
 
-                    Log.Information(Configuration.SuccessMessage);
+                        FujiFilmController fujiFilm214 = new(Configuration.Root);
+                        fujiFilm214.Start();
+
+                        Log.Information(Configuration.SuccessMessage);
+                    }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     EmailHandler.EmailManager.SendEmail(EmailHandler.AlertMessage);
-                    Log.Information(e, Configuration.FailMessage);
+                    Log.Information(Configuration.FailMessage);
                 }
-                finally { Log.CloseAndFlush(); }
+                finally
+                {
+                    Log.CloseAndFlush();
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine(Configuration.LoggerFailure + " " + e.StackTrace);
+                Console.WriteLine(Configuration.LoggerFailure + " " + e.Message + " " + e.StackTrace);
             }
         }
     }

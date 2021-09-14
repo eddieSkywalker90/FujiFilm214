@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Janky.Utilities" Version="1.1.0-rc4" />
-    <PackageReference Include="JankyIntegrationManager" Version="1.0.0-rc1" />
+    <PackageReference Include="Janky.Utilities" Version="1.1.0-rc6" />
+    <PackageReference Include="JankyIntegrationManager" Version="1.0.0-rc2" />
     <PackageReference Include="MailKit" Version="2.15.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.9">

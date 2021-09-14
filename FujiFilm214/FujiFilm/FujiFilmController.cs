@@ -41,7 +41,7 @@ namespace FujiFilm214.FujiFilm
 
                 // Dev-only environment returns limited return to run faster for debugging.
                 if (Configuration.Environment == "Development")
-                    changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Take(1).ToList();
+                    changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.Take(3).ToList();
                 else // Production environment returns all.
                     changedStatuses = dbContext.VwTmsShipmentLegStatusesV1s.ToList();
 
@@ -70,7 +70,7 @@ namespace FujiFilm214.FujiFilm
         /// <returns></returns>
         protected override XDocument GetRecordPayload(string recordId)
         {
-            Log.Debug($"Building XML for record #: {recordId}..");
+            Log.Debug($"Building XML for record #{recordId}..");
 
             try
             {
@@ -95,7 +95,7 @@ namespace FujiFilm214.FujiFilm
                 if (shipmentLegStatus == null) return xDoc;
 
                 Log.Debug(
-                    $"{shipmentLegStatus.Id} - {shipmentLegStatus.ShipmentLeg?.ShipperReference} - {shipmentLegStatus.ShipmentLeg?.Load?.LoadGroup} - {shipmentLegStatus.ShipmentLeg?.PickUpStop?.LocationCity} - {shipmentLegStatus.ShipmentLeg?.DropOffStop?.LocationCity}");
+                    $"#{shipmentLegStatus.Id} - {shipmentLegStatus.ShipmentLeg?.ShipperReference} - {shipmentLegStatus.ShipmentLeg?.Load?.LoadGroup} - {shipmentLegStatus.ShipmentLeg?.PickUpStop?.LocationCity} - {shipmentLegStatus.ShipmentLeg?.DropOffStop?.LocationCity}");
 
                 return xDoc;
             }
@@ -111,24 +111,22 @@ namespace FujiFilm214.FujiFilm
         ///     moving on to the next. (i.e. emails, ftp upload, etc.)
         /// </summary>
         /// <param name="payload"></param>
-        protected override void HandlePayload(XDocument payload)
+        protected override bool HandlePayload(XDocument payload)
         {
             try
             {
                 // Send payload to EDIConverter to return EDI converted text.
-                var ediService = new EdiServiceConnector();
-                var ediPayload = ediService.ConvertXmlToEdi(payload, Configuration.XmlToEdiServiceAddress, Configuration.X12Version, Configuration.X12Document);
+                var ediPayload = EdiServiceConnector.ConvertXmlToEdi(payload, Configuration.XmlToEdiServiceAddress, Configuration.X12Version, Configuration.X12Document);
 
                 SftpManager sftp = new(
                     Configuration.Host,
                     Convert.ToInt32(Configuration.Port),
                     Configuration.Username,
-                    Configuration.Password,
-                    Configuration.Filename,
-                    Configuration.FtpDirectory,
-                    Configuration.AlternateFtpDirectory);
+                    Configuration.Password);
 
-                sftp.Upload(ediPayload);
+                sftp.Upload(ediPayload, Configuration.FtpDirectory, SftpManager.GetTimeStampedFileName(Configuration.Filename));
+
+                return true;
             }
             catch (HttpRequestException)
             {
@@ -136,7 +134,9 @@ namespace FujiFilm214.FujiFilm
             }
             catch (Exception e)
             {
-                Log.Error(e, "Error uploading to Ftp. Check Configuration data to ensure required inputs are filled in.");
+                Log.Error(e, "Error uploading to Ftp. Check Configuration data to ensure required inputs are filled in.\n" +
+                             $"Service Address: {Configuration.XmlToEdiServiceAddress}\n" +
+                             $"X12Version: {Configuration.X12Version} and X12Document {Configuration.X12Document}");
                 throw;
             }
         }

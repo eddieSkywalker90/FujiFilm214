@@ -12,8 +12,13 @@ namespace FujiFilm214
 
         public static readonly string Environment = System.Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
 
+        // Switches.
+        public static readonly string ReprocessIdenticalRecords = Root["IntegrationManagerOptions:ReprocessIdenticalRecordsONOFF"];
+        public static readonly string DatabaseAutoMigration = Root["IntegrationManagerOptions:DatabaseAutoMigrationONOFF"];
+
         // Database.
         public static readonly string ChemStarDbConnection = Root["ConnectionStrings:ChemStarDb"];
+        public static readonly string SqLiteDbConnection = Root["ConnectionStrings:SqLiteDb"];
 
         // Logging.
         public static readonly string LogsFilePath = Root["Configuration:LogsFilePath"];
@@ -31,7 +36,6 @@ namespace FujiFilm214
         public static readonly string Password = Root["Ftp:Password"];
         public static readonly string Filename = Root["Ftp:FilenameWithExtension"];
         public static readonly string FtpDirectory = Root["Ftp:FtpDirectory"];
-        public static readonly string AlternateFtpDirectory = Root["Ftp:AlternateFtpDirectory"];
 
         // Email.
         public static readonly string ToEmail = Root["Email:ToEmail"];

@@ -18,6 +18,7 @@ namespace FujiFilm214
 
         // Database.
         public static readonly string ChemStarDbConnection = Root["ConnectionStrings:ChemStarDb"];
+        public static readonly string SqLiteDbConnection = Root["ConnectionStrings:SqLiteDb"];
 
         // Logging.
         public static readonly string LogsFilePath = Root["Configuration:LogsFilePath"];
